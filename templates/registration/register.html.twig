@@ -1,0 +1,88 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Register{% endblock %}
+
+{% block body %}
+    
+    {# <section class="min-h-screen flex flex-col items-center justify-center bg-gray-50">  #}
+    <div class="flex flex-col items-center"> 
+        <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white mb-4"> 
+        icon
+    </div>
+    <h1 class="font-bold text-2xl text-gray-900"> Créer votre compte</h1>
+    <p class="text-sm text-gray-500 mt-1">Ou 
+    <a href="{{ path('app_login') }}" class="text-blue-600 hover:underline">connectez-vous à votre compte </a>
+        </p>
+    </div>  
+
+    {# {% if error %}
+    <div class="w-full max-w-md bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+    {{ error.messageKey|trans(error.messageData, 'security')}} 
+    </div>
+     {% endif %} #}
+
+     <form method="post" class="flex flex-col gap-4"> 
+    {{ form_start(registrationForm) }}
+
+        <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium text-gray-700">Prénom :</label>
+            <input type="text" 
+                   class="border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required autofocus>
+        </div>
+
+        <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium text-gray-700">Nom :</label>
+            <input type="text"
+                   class="border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required autofocus>
+        </div>
+    
+
+        <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium text-gray-700">Raison sociale :</label>
+            <input type="text" name="raison_sociale" 
+                   class="border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   placeholder="Tech Solutions" required autofocus>
+        </div>
+
+        <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium text-gray-700">IBAN :</label>
+            <input type="text"  
+                   class="border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required autofocus>
+        </div>
+
+
+        <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium text-gray-700">Email :</label>
+            <input type="email" name="email" 
+                   class="border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   placeholder="contact@entreprise.fr" required autofocus>
+        </div>
+
+        <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium text-gray-700"> Password</label>
+            <input type="password" name="password"
+                   class="border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   placeholder="password" required>
+        </div>
+
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+        <button type="submit"
+                class="w-full bg-blue-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition">
+            Créer mon compte
+        </button>
+        </form>
+    {# </section> #}
+
+    {{ form_errors(registrationForm) }}
+{{ form_row(registrationForm.email) }}
+        {{ form_row(registrationForm.plainPassword, {
+            label: 'Password'
+        }) }}
+         
+        
+
+    {{ form_end(registrationForm) }}
+{% endblock %}
