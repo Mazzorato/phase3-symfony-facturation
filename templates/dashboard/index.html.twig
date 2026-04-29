@@ -1,0 +1,60 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello DashboardController!{% endblock %}
+
+{% block body %}
+
+
+<div class="w-64 h-min-screen bg-white border-r border-gray-200 flex flex-col fixed">
+            <div class="px-6 py-5 ">
+                <a href="{{ path('app_dashboard') }}" class="flex items-center gap-2 text-blue-600 font-bold text-3xl">
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                    FactureSaaS
+                </a>
+            </div>
+            
+            <nav class="flex-1 px-6 py-4 flex gap-2">
+                <a href="{{ path('app_dashboard') }}" class="flex items-center gap-2 px-4 py-2 rounded-lg text-lg font-medium text-gray-600 hover:bg-gray-100">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    Dashboard
+                </a>
+            </nav>
+
+            <nav class="flex-1 px-6 py-4 flex gap-2">
+                {# <!-- <a href="{{ path('app_invoices') }}" class="flex items-center gap-2 px-4 py-2 rounded-lg text-lg font-medium text-gray-600 hover:bg-gray-100"> --> #}
+                    <i class="fa-solid fa-file-invoice"></i>
+                    Factures
+                {# <!-- </a> --> #}
+            </nav>
+                
+            
+            <nav class="flex-1 px-6 py-4 flex gap-2">
+                {# <a href="{{ path('app_customers') }}" class="flex items-center gap-2 px-4 py-2 rounded-lg text-lg font-medium text-gray-600 hover:bg-gray-100"> #}
+                <i class="fa-solid fa-users"></i>
+                    Clients
+                {# </a> #}
+            </nav>
+
+            <nav class="flex-1 px-6 py-4 flex  gap-2">
+                {# <a href="{{ path('app_products') }}" class="flex items-center gap-2 px-4 py-2 rounded-lg text-lg font-medium text-gray-600 hover:bg-gray-100"> #}
+                    <i class="fa-solid fa-box"></i>
+                    Produits
+                {# </a> #}
+            </nav>
+        
+            <nav class="flex-1 px-6 py-4 flex gap-2">
+                {# <a href="{{ path('app_profile') }}" class="flex items-center gap-2 px-4 py-2 rounded-lg text-lg font-medium text-gray-600 hover:bg-gray-100"> #}
+                <i class="fa-solid fa-gear"></i>                    
+               
+                Profil
+                {# </a> #}
+            </nav>
+        
+
+
+    
+    </div>
+    
+        {% endblock %}
+   
+
