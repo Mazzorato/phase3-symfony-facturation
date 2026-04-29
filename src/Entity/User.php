@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Entity\Client;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -43,7 +44,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $clients;
 
     #[ORM\Column(length: 255)]
-    private ?string $user = null;
+    private ?string $firstName = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $lastName = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $companyName = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $iban = null;
 
     public function __construct()
     {
@@ -155,14 +165,51 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getUser(): ?string
+
+    public function getFirstName(): ?string
     {
-        return $this->user;
+        return $this->firstName;
     }
 
-    public function setUser(string $user): static
+    public function setFirstName(string $firstName): static
     {
-        $this->user = $user;
+        $this->firstName = $firstName;
+
+        return $this;
+    }
+
+    public function getLastName(): ?string
+    {
+        return $this->lastName;
+    }
+
+    public function setLastName(string $lastName): static
+    {
+        $this->lastName = $lastName;
+
+        return $this;
+    }
+
+    public function getCompanyName(): ?string
+    {
+        return $this->companyName;
+    }
+
+    public function setCompanyName(string $companyName): static
+    {
+        $this->companyName = $companyName;
+
+        return $this;
+    }
+
+    public function getIban(): ?string
+    {
+        return $this->iban;
+    }
+
+    public function setIban(string $iban): static
+    {
+        $this->iban = $iban;
 
         return $this;
     }

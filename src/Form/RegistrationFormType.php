@@ -2,6 +2,7 @@
 
 namespace App\Form;
 
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -15,10 +16,15 @@ class RegistrationFormType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('email')
+            ->add('firstName', TextType::class, ['label' => 'Prénom'])
+            ->add('lastName', TextType::class, ['label' => 'Nom'])
+            ->add('companyName', TextType::class, ['label' => 'Raison sociale'])
+            ->add('iban', TextType::class, ['label' => 'IBAN'])
+            ->add('email', TextType::class, ['label' => 'Email'])
             ->add('plainPassword', PasswordType::class, [
                 // instead of being set onto the object directly,
                 // this is read and encoded in the controller
+                'label' => 'Mot de passe',
                 'mapped' => false,
                 'attr' => ['autocomplete' => 'new-password'],
                 'constraints' => [

@@ -22,6 +22,10 @@ security:
             custom_authenticator: App\Security\LoginFormAuthentificatorAuthenticator
             logout:
                 path: app_logout
+            remember_me:
+                secret:  '%kernel.secret%'
+                lifetime: 3600 # 1h in seconds
+                path: /login
                 # where to redirect after logout
                 # target: app_any_route
 
