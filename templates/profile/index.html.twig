@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello ProfileController!{% endblock %}
+
+{% block body %}
+
+
+<h1 class="flex items-center justify-center text-3xl font-bold mb-4">Mon Profil</h1>
+
+    <div class="">
+        {{ form_start(form) }}
+        <div class="flex flex-col gap-1 mb-4">
+            {{ form_label(form.companyName, null, {label_attr: {class: 'text-sm font-medium text-gray-700'}}) }}
+            {{ form_widget(form.companyName, {attr: {class: 'border border-gray-300 rounded-lg px-4 py-2.5 text-sm w-full', placeholder: 'Ma société'}}) }}
+            <p class="text-sm text-gray-500">Le nom de votre entreprise qui apparaîtra sur vos factures</p>
+        </div>
+
+     <div class="flex flex-col gap-1">
+            {{ form_label(form.iban, null, {label_attr: {class: 'text-sm font-medium text-gray-700'}}) }}
+            {{ form_widget(form.iban, {attr: {class: 'border border-gray-300 rounded-lg px-4 py-2.5 text-sm w-full', placeholder: 'FR76 3000 4000 1234 5678 9012 345'}}) }}
+            <p class="text-sm text-gray-500">Compte bancaire qui recevra les virements de vos clients</p>
+            
+        </div>
+
+{% endblock %}

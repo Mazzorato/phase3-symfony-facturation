@@ -3,58 +3,64 @@
 {% block title %}Hello DashboardController!{% endblock %}
 
 {% block body %}
-
-
-<div class="w-64 h-min-screen bg-white border-r border-gray-200 flex flex-col fixed">
-            <div class="px-6 py-5 ">
-                <a href="{{ path('app_dashboard') }}" class="flex items-center gap-2 text-blue-600 font-bold text-3xl">
-                    <i class="fa-solid fa-file-invoice-dollar"></i>
-                    FactureSaaS
-                </a>
-            </div>
-            
-            <nav class="flex-1 px-6 py-4 flex gap-2">
-                <a href="{{ path('app_dashboard') }}" class="flex items-center gap-2 px-4 py-2 rounded-lg text-lg font-medium text-gray-600 hover:bg-gray-100">
-                    <i class="fa-solid fa-chart-pie"></i>
-                    Dashboard
-                </a>
-            </nav>
-
-            <nav class="flex-1 px-6 py-4 flex gap-2">
-                {# <!-- <a href="{{ path('app_invoices') }}" class="flex items-center gap-2 px-4 py-2 rounded-lg text-lg font-medium text-gray-600 hover:bg-gray-100"> --> #}
-                    <i class="fa-solid fa-file-invoice"></i>
-                    Factures
-                {# <!-- </a> --> #}
-            </nav>
-                
-            
-            <nav class="flex-1 px-6 py-4 flex gap-2">
-                {# <a href="{{ path('app_customers') }}" class="flex items-center gap-2 px-4 py-2 rounded-lg text-lg font-medium text-gray-600 hover:bg-gray-100"> #}
-                <i class="fa-solid fa-users"></i>
-                    Clients
-                {# </a> #}
-            </nav>
-
-            <nav class="flex-1 px-6 py-4 flex  gap-2">
-                {# <a href="{{ path('app_products') }}" class="flex items-center gap-2 px-4 py-2 rounded-lg text-lg font-medium text-gray-600 hover:bg-gray-100"> #}
-                    <i class="fa-solid fa-box"></i>
-                    Produits
-                {# </a> #}
-            </nav>
-        
-            <nav class="flex-1 px-6 py-4 flex gap-2">
-                {# <a href="{{ path('app_profile') }}" class="flex items-center gap-2 px-4 py-2 rounded-lg text-lg font-medium text-gray-600 hover:bg-gray-100"> #}
-                <i class="fa-solid fa-gear"></i>                    
-               
-                Profil
-                {# </a> #}
-            </nav>
-        
-
-
-    
+<section class="bg-gray-100 min-h-screen flex flex-col items-center justify-start p-8">
+    <div class="w-full max-w-4xl p-6 mb-8"> 
+    <h1 class=" text-3xl font-bold mb-4">Dashboard</h1> 
     </div>
+
+
+    <div class="grid grid-cols-4 gap-4 mb-8">
+        <div class="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-3">
+            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+            <i class="fa-solid fa-euro-sign text-green-600"></i>
+        </div>
+            <p class="text-sm text-gray-500">Chiffre d'affaires (Payé)</p>
+            <p class="text-2xl font-bold text-gray-900">total payé €</p>
+        </div>
+
+        <div class="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-3">
+            <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                <i class="fa-solid fa-file text-orange-600"></i>
+            </div>
+            <p class="text-sm text-gray-500">Factures en attente de paiement</p>
+            <p class="text-2xl font-bold text-gray-900">1</p>
+        </div>
+
+        <div class="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-3">
+            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <i class="fa-solid fa-users text-blue-600"></i>
+            </div>
+            <p class="text-sm text-gray-500">Total client </p>
+            <p class="text-2xl font-bold text-gray-900">2</p>
+        </div>
+
+        <div class="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-3">
+            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                <i class="fa-solid fa-box-open text-purple-600"></i>
+            </div>
+            <p class="text-sm text-gray-500">Total produits</p>
+            <p class="text-2xl font-bold text-gray-900">3</p>
+        </div>
+    </div>
+
+
+        <div class="flex flex-col gap-3 bg-white rounded-xl border border-gray-200 p-6">
+            <h2 class="text-2xl">Chiffre d'affaires mensuel (Factures payées) </h2>
+            <div class="flex flex-col gap-4">
+            <img src="assets/BarChart.png" alt="BarChart" class="w-full h-64 object-cover rounded-lg">
+            2400
+
+            2200 
+
+            2000
+
+            1800
+
+            1600
+            </div>
+        </div> 
     
-        {% endblock %}
+</section>
+{% endblock %}
    
 
