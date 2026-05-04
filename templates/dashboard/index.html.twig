@@ -3,14 +3,14 @@
 {% block title %}Hello DashboardController!{% endblock %}
 
 {% block body %}
-<section class="bg-gray-100 min-h-screen flex flex-col items-center justify-start p-8">
-    <div class="w-full max-w-4xl p-6 mb-8"> 
-    <h1 class=" text-3xl font-bold mb-4">Dashboard</h1> 
+<section class="bg-gray-100 h-screen p-8 w-full">
+    <div class="w-full mb-8"> 
+    <h1 class=" text-3xl font-bold text-gray-800">Dashboard</h1> 
     </div>
 
 
-    <div class="grid grid-cols-4 gap-4 mb-8">
-        <div class="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-3">
+    <div class="w-full grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-3 shadow-sm">
             <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
             <i class="fa-solid fa-euro-sign text-green-600"></i>
         </div>
@@ -18,7 +18,7 @@
             <p class="text-2xl font-bold text-gray-900">total payé €</p>
         </div>
 
-        <div class="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-3">
+        <div class="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-3 shadow-sm">
             <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
                 <i class="fa-solid fa-file text-orange-600"></i>
             </div>
@@ -26,7 +26,7 @@
             <p class="text-2xl font-bold text-gray-900">1</p>
         </div>
 
-        <div class="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-3">
+        <div class="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-3 shadow-sm">
             <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                 <i class="fa-solid fa-users text-blue-600"></i>
             </div>
@@ -34,7 +34,7 @@
             <p class="text-2xl font-bold text-gray-900">2</p>
         </div>
 
-        <div class="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-3">
+        <div class="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-3 shadow-sm">
             <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
                 <i class="fa-solid fa-box-open text-purple-600"></i>
             </div>
@@ -43,15 +43,54 @@
         </div>
     </div>
 
-
-        <div class="flex flex-col gap-3 bg-white rounded-xl border border-gray-200 p-6">
-            <h2 class="text-2xl">Chiffre d'affaires mensuel (Factures payées) </h2>
-            <div class="flex flex-col gap-4">
+     <div class="w-full bg-white rounded-xl border border-gray-200 p-6 mb-8 shadow-sm">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-lg font-bold text-gray-800">Chiffre d'affaires mensuel (Factures payées)</h2>
+            <select class="border border-gray-200 text-gray-600 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer">
+                <option value="2023">2023</option>
+                <option value="2022">2022</option>
+            </select>
+        </div>
             <img src="{{ asset('BarChart.png') }}" alt="BarChart" class="w-full h-64 object-cover rounded-lg">
             
             </div>
         </div> 
     
+    <div class="w-full grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <a href="#" class="flex items-center justify-between p-6 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors">
+            <div>
+                <p class="text-lg font-bold text-blue-900">Créer une facture</p>
+                <p class="text-sm  text-blue-600">Nouvelle prestation</p>
+            </div>
+            <i class="fa-solid fa-arrow-right text-blue-600 group-hover:translate-x-1 transition-transform"></i>
+        </a>
+
+        <a href="#" class="flex items-center justify-between p-6 bg-white rounded-xl hover:bg-gray-100 transition-colors">
+            <div> 
+                <p class="text-lg font-bold text-gray-900">Ajouter un client</p>
+                <p class="text-sm text-gray-600">Gérer le répertoire des clients</p>
+            </div>
+            <i class="fa-solid fa-arrow-right text-gray-500 group-hover:translate-x-1 transition-transform"></i>
+        </a>
+
+        <a href="#" class="flex items-center justify-between p-6 bg-white rounded-xl hover:bg-gray-100 transition-colors">
+            <div>
+                <p class="text-lg font-bold text-gray-900">Créer un produit/service</p>
+                <p class="text-sm text-gray-600">Enrichir le catalogue pour rediger rapidement vos factures</p>
+            </div>
+            <i class="fa-solid fa-arrow-right text-gray-500 group-hover:translate-x-1 transition-transform"></i >
+         </a>
+    </div>
+
+    <div class="w-full grid grid-cols-1 md:grid-cols-3 gap-6">
+        <a href="#" class="flex items-center justify-between p-6 bg-white rounded-xl hover:bg-gray-100 transition-colors">
+            <div>
+                <p class="text-lg font-bold text-gray-900">Relancer tous les clients</p>
+                <p class="text-sm text-gray-600">Envoyer un mail à tous les clients en retard de paiement</p>
+            </div>
+            <i class="fa-solid fa-arrow-right text-gray-500 group-hover:translate-x-1 transition-transform"></i> 
+        </a>
+    </div>
 </section>
 {% endblock %}
    
