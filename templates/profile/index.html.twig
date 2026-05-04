@@ -1,25 +1,32 @@
 {% extends 'base.html.twig' %}
-
-{% block title %}Hello ProfileController!{% endblock %}
-
+{% block title %}Mon Profil{% endblock %}
 {% block body %}
-
-
-<h1 class="flex items-center justify-center text-3xl font-bold mb-4">Mon Profil</h1>
-
-    <div class="">
+<section class="bg-gray-100 h-screen p-8">
+    <h1 class="text-3xl font-bold mb-6">Mon Profil</h1>
+    <div class="bg-white rounded-xl border border-gray-200 p-6 max-w-2xl">
         {{ form_start(form) }}
         <div class="flex flex-col gap-1 mb-4">
             {{ form_label(form.companyName, null, {label_attr: {class: 'text-sm font-medium text-gray-700'}}) }}
-            {{ form_widget(form.companyName, {attr: {class: 'border border-gray-300 rounded-lg px-4 py-2.5 text-sm w-full', placeholder: 'Ma société'}}) }}
+            {{ form_widget(form.companyName, {attr: {class: 'border border-gray-300 rounded-lg px-4 py-2.5 text-sm ', placeholder: 'Ma société'}}) }}
             <p class="text-sm text-gray-500">Le nom de votre entreprise qui apparaîtra sur vos factures</p>
         </div>
-
-     <div class="flex flex-col gap-1">
-            {{ form_label(form.iban, null, {label_attr: {class: 'text-sm font-medium text-gray-700'}}) }}
-            {{ form_widget(form.iban, {attr: {class: 'border border-gray-300 rounded-lg px-4 py-2.5 text-sm w-full', placeholder: 'FR76 3000 4000 1234 5678 9012 345'}}) }}
-            <p class="text-sm text-gray-500">Compte bancaire qui recevra les virements de vos clients</p>
-            
+        <div class="flex flex-col gap-1 mb-4">
+            {{ form_label(form.siret, null, {label_attr: {class: 'text-sm font-medium text-gray-700'}}) }}
+            {{ form_widget(form.siret, {attr: {class: 'border border-gray-300 rounded-lg px-4 py-2.5 text-sm ', placeholder: '123 456 789 00012'}}) }}
         </div>
-
+        <div class="flex flex-col gap-1 mb-4">
+            {{ form_label(form.iban, null, {label_attr: {class: 'text-sm font-medium text-gray-700'}}) }}
+            {{ form_widget(form.iban, {attr: {class: 'border border-gray-300 rounded-lg px-4 py-2.5 text-sm ', placeholder: 'FR76 1234 5678 9101 1314 1516'}}) }}
+            <p class="text-sm text-gray-500">Compte bancaire qui recevra les virements de vos clients</p>
+        </div>
+        <div class="flex flex-col gap-1 mb-4">
+            {{ form_label(form.cgv, null, {label_attr: {class: 'text-sm font-medium text-gray-700'}}) }}
+            {{ form_widget(form.cgv, {attr: {class: 'h-32 border border-gray-300 rounded-lg px-4 py-2.5 text-sm', placeholder: 'Ces conditions apparaîtront en bas de vos factures PDF...'}}) }}
+        </div>
+        <div class="flex justify-start mt-6">
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">Enregistrer les modifications</button>
+        </div>
+        {{ form_end(form) }}
+    </div>
+</section>
 {% endblock %}
