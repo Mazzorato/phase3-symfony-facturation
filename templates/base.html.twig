@@ -3,23 +3,71 @@
     <head>
         <meta charset="UTF-8">
         <title>{% block title %}Welcome!{% endblock %}</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
-        {% block stylesheets %}
-        {% endblock %}
-
+        {% block stylesheets %}{% endblock %}
         {% block javascripts %}
             {% block importmap %}{{ importmap('app') }}{% endblock %}
         {% endblock %}
+    </head>
+    <body class="flex bg-gray-100 min-h-screen">
 
-        {% set frankenphpHotReload = app.request.server.get('FRANKENPHP_HOT_RELOAD') %}
-        {% if frankenphpHotReload %}
-        <meta name="frankenphp-hot-reload:url" content="{{ frankenphpHotReload }}">
-        <script src="https://cdn.jsdelivr.net/npm/idiomorph"></script>
-        <script src="https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm" type="module"></script>
+        {% if app.user %}
+        <div class="w-64 h-screen bg-white border-r border-gray-200 flex flex-col fixed">
+            <div class="px-6 py-5">
+                <a href="{{ path('app_dashboard') }}" class="flex items-center gap-2 text-blue-600 font-bold text-3xl">
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                    FactureSaaS
+                </a>
+            </div>
+            <nav class="flex-1 px-6 py-4 flex gap-2 flex-col">
+                <a href="{{ path('app_dashboard') }}" class="flex items-center gap-2 px-4 py-2 rounded-lg text-lg font-medium text-gray-600 hover:bg-gray-100">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    Dashboard
+                </a>
+                <a href="{{ path('app_invoice') }}" class="flex items-center gap-2 px-4 py-2 rounded-lg text-lg font-medium text-gray-600 hover:bg-gray-100">
+                    <i class="fa-solid fa-file-invoice"></i>
+                    Factures
+                </a>
+                <a href="#" class="flex items-center gap-2 px-4 py-2 rounded-lg text-lg font-medium text-gray-600 hover:bg-gray-100">
+                    <i class="fa-solid fa-users"></i>
+                    Clients
+                </a>
+                <a href="#" class="flex items-center gap-2 px-4 py-2 rounded-lg text-lg font-medium text-gray-600 hover:bg-gray-100">
+                    <i class="fa-solid fa-box"></i>
+                    Produits
+                </a>
+                <a href="{{ path('app_profile') }}" class="flex items-center gap-2 px-4 py-2 rounded-lg text-lg font-medium text-gray-600 hover:bg-gray-100">
+                    <i class="fa-solid fa-gear"></i>
+                    Profil
+                </a>
+            </nav>
+            <div class="border-t border-gray-200 px-6 py-4">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="bg-blue-400 flex items-center justify-center w-10 h-10 rounded-full">
+                    <a href="{{ path('app_profile') }}" class="text-white font-bold text-sm">{{ app.user.firstName|first|upper }}{{ app.user.lastName|first|upper }}
+                    </div>
+                    <div class="flex flex-col">
+                        <p class="text-sm font-medium text-gray-900">{{ app.user.companyName }}</p>
+                        <p class="text-xs text-gray-500">{{ app.user.email }}</p>
+                    </a>
+                    </div>
+                </div>
+                <a href="{{ path('app_logout') }}" class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-red-500 hover:bg-gray-100">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    Déconnexion
+                </a>
+            </div>
+        </div>
         {% endif %}
     </head>
     <body>
     
         {% block body %}{% endblock %}
+
+        <main class="{{ app.user ? 'ml-64' : '' }} flex-1">
+            {% block body %}{% endblock %}
+        </main>
+
     </body>
 </html>
