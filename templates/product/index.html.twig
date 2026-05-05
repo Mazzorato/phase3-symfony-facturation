@@ -4,7 +4,44 @@
 
 {% block body %}
 <section class="bg-gray-100 h-screen p-8">
-    <h1 class="text-3xl font-bold text-gray-800 py-6 gap-6">Produits et Services</h1>
+    <div class="flex justify-between mb-4">
+    <h1 class="text-3xl font-bold text-gray-800 gap-6">Produits et Services</h1>
+        <a href="{{ path('app_product_new') }}" class="flex justify-center items-center gap-2 bg-blue-600 text-white px-2 py-1 rounded-lg hover:bg-blue-700">
+          <i class="fa-solid fa-plus"></i>
+          <button type="submit">Ajouter un Produit 
+          </button>
+        </a>
+    </div>
+    <table class="w-full bg-white rounded-lg shadow-md">
+        <thead>
+            <tr>
+                <th class="py-3 px-6 bg-gray-100 text-left text-sm font-semibold text-gray-900">Nom</th>
+                <th class="py-3 px-6 bg-gray-100 text-left text-sm font-semibold text-gray-900">Description</th>
+                <th class="py-3 px-6 bg-gray-100 text-left text-sm font-semibold text-gray-900">Prix Unitaire</th>
+                <th class="py-3 px-6 bg-gray-100 text-left text-sm font-semibold text-gray-900">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr class="border-t">
+                <td class="py-4 px-6">{{ product.name }}</td>
+                <td class="py-4 px-6">{{ product.description }}</td>
+                <td class="py-4 px-6">{{ product.price }} €  / {{ product.unit }} </td>
+                <td class="py-4 px-6">
+                    <a href="{{ path('app_product_edit', {id: product.id}) }}" class="text-blue-600 hover:underline">Modifier</a> |
+                    <form method="post" action="{{ path('app_product_delete', {'id': product.id}) }}" style="display:inline-block;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ product.id) }}">
+                        <button type="submit" class="text-red-600 hover:underline">Supprimer</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4" class="py-4 px-6 text-center text-gray-500">Aucun produit trouvé.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
     
 </section>
 {% endblock %}
