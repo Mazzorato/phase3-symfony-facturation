@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau Client{% endblock %}
+
+{% block body %}
+    <section class="bg-gray-100 min-h-screen p-6">
+       <h1 class="text-2xl font-bold text-gray-800 text-center mb-8 uppercase tracking-widest">Ajouter un nouveau client </h1> *
+       <div class="max-w-xl mx-auto bg-white rounded-xl shadow-md p-6 mb-10">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-semibold text-gray-700">Nouveau Client</h2>   
+        </div> 
+        {{ include('client/_form.html.twig')}}
+       </div>
+
+    <h2 class="text-2xl font-bold text-gray-800 text-center mb-6">Clients existants</h2>
+
+    <table class="w-full bg-white rounded-lg shadow-md">
+        <thead>
+            <tr>
+                <th class="py-3 px-6 bg-gray-100 text-left text-sm font-semibold text-gray-900">Nom</th>
+                <th class="py-3 px-6 bg-gray-100 text-left text-sm font-semibold text-gray-900">Contact</th>
+                <th class="py-3 px-6 bg-gray-100 text-left text-sm font-semibold text-gray-900">Adresse</th>
+                <th class="py-3 px-6 bg-gray-100 text-left text-sm font-semibold text-gray-900">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for client in client %}
+            <tr class="border-t">
+                <td class="py-4 px-6">{{ client.name }}</td>
+                <td class="py-4 px-6">{{ client.contact }}</td>
+                <td class="py-4 px-6">{{ client.address }}</td>
+                <td class="py-4 px-6">
+                    <a href="{{ path('app_client_edit', {id: client.id}) }}" class="text-blue-500 hover:text-blue-700 mr-2">
+                        <i class="fa-solid fa-pen"></i>
+                    </a>
+                    <form method="post" action="{{ path('app_client_delete', {'id': client.id}) }}" style="display:inline-block;" onsubmit="return confirm('Supprimer ce client ?');">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ client.id) }}">
+                        <button type="submit" class="text-red-500 hover:text-red-700">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4" class="py-4 px-6 text-center text-gray-500">Aucun client trouvé.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+       
+    </section>
+{% endblock %}

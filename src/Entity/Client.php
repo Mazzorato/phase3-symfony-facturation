@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use App\Entity\Invoice;
+use App\Entity\User;
 use App\Repository\ClientRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -21,37 +23,30 @@ class Client
     #[ORM\Column(length: 255)]
     private ?string $email = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $phone = null;
 
     #[ORM\Column(length: 255)]
     private ?string $address = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $string = null;
-
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $rib = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $siret = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $contact = null;
+
     #[ORM\ManyToOne(inversedBy: 'clients')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?User $user = null;
 
-    /**
-     * @var Collection<int, Invoice>
-     */
-    #[ORM\OneToMany(targetEntity: Invoice::class, mappedBy: 'user')]
-    private Collection $client;
-
-    /**
-     * @var Collection<int, Invoice>
-     */
     #[ORM\OneToMany(targetEntity: Invoice::class, mappedBy: 'client')]
     private Collection $invoices;
 
     public function __construct()
     {
-        $this->client = new ArrayCollection();
         $this->invoices = new ArrayCollection();
     }
 
@@ -68,7 +63,6 @@ class Client
     public function setName(string $name): static
     {
         $this->name = $name;
-
         return $this;
     }
 
@@ -80,7 +74,6 @@ class Client
     public function setEmail(string $email): static
     {
         $this->email = $email;
-
         return $this;
     }
 
@@ -92,7 +85,6 @@ class Client
     public function setPhone(string $phone): static
     {
         $this->phone = $phone;
-
         return $this;
     }
 
@@ -104,19 +96,28 @@ class Client
     public function setAddress(string $address): static
     {
         $this->address = $address;
-
         return $this;
     }
 
-    public function getString(): ?string
+    public function getContact(): ?string
     {
-        return $this->string;
+        return $this->contact;
     }
 
-    public function setString(string $string): static
+    public function setContact(string $contact): static
     {
-        $this->string = $string;
+        $this->contact = $contact;
+        return $this;
+    }
 
+    public function getSiret(): ?string
+    {
+        return $this->siret;
+    }
+
+    public function setSiret(?string $siret): static
+    {
+        $this->siret = $siret;
         return $this;
     }
 
@@ -128,7 +129,6 @@ class Client
     public function setRib(string $rib): static
     {
         $this->rib = $rib;
-
         return $this;
     }
 
@@ -140,43 +140,9 @@ class Client
     public function setUser(?User $user): static
     {
         $this->user = $user;
-
         return $this;
     }
 
-    /**
-     * @return Collection<int, Invoice>
-     */
-    public function getClient(): Collection
-    {
-        return $this->client;
-    }
-
-    public function addClient(Invoice $client): static
-    {
-        if (!$this->client->contains($client)) {
-            $this->client->add($client);
-            $client->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeClient(Invoice $client): static
-    {
-        if ($this->client->removeElement($client)) {
-            // set the owning side to null (unless already changed)
-            if ($client->getUser() === $this) {
-                $client->setUser(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Invoice>
-     */
     public function getInvoices(): Collection
     {
         return $this->invoices;
@@ -188,19 +154,16 @@ class Client
             $this->invoices->add($invoice);
             $invoice->setClient($this);
         }
-
         return $this;
     }
 
     public function removeInvoice(Invoice $invoice): static
     {
         if ($this->invoices->removeElement($invoice)) {
-            // set the owning side to null (unless already changed)
             if ($invoice->getClient() === $this) {
                 $invoice->setClient(null);
             }
         }
-
         return $this;
     }
 }
