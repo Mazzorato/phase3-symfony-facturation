@@ -29,12 +29,8 @@ class Invoice
     #[ORM\Column]
     private ?\DateTime $createAt = null;
 
-    #[ORM\ManyToOne(inversedBy: 'client')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Client $user = null;
-
     #[ORM\ManyToOne(inversedBy: 'invoices')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Client $client = null;
 
     /**
@@ -97,18 +93,6 @@ class Invoice
     public function setCreateAt(\DateTime $createAt): static
     {
         $this->createAt = $createAt;
-
-        return $this;
-    }
-
-    public function getUser(): ?Client
-    {
-        return $this->user;
-    }
-
-    public function setUser(?Client $user): static
-    {
-        $this->user = $user;
 
         return $this;
     }

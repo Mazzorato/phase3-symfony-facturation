@@ -1,20 +1,71 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello InvoiceController!{% endblock %}
+{% block title %}Hello ProductController!{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
-
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
-
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>/home/user/phase3-symfony-facturation/src/Controller/InvoiceController.php</code></li>
-        <li>Your template at <code>/home/user/phase3-symfony-facturation/templates/invoice/index.html.twig</code></li>
-    </ul>
-</div>
+<section class="bg-gray-100 h-screen p-8">
+    <div class="flex justify-between mb-4">
+    <h1 class="text-3xl font-bold text-gray-800 gap-6">Factures</h1>
+        <a href="{{ path('app_invoice_new') }}" class="flex justify-center items-center gap-2 bg-blue-600 text-white px-2 py-1 rounded-lg hover:bg-blue-700">
+          <i class="fa-solid fa-plus"></i>
+          <button type="submit">Créer une Facture
+          </button>
+        </a>
+    </div>
+    <div class="flex gap-2 mb-4">
+        <a href="{{ path('app_invoice') }}" class="px-4 py-2 rounded-full text-sm font-medium transition {{ currentStatus is null ? 'bg-blue-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-100' }}">Toutes</a>
+        <a href="{{ path('app_invoice', {status: 'brouillons'}) }}" class="px-4 py-2 rounded-full text-sm font-medium transition {{ currentStatus == 'brouillons' ? 'bg-blue-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-100' }}">Brouillons</a>
+        <a href="{{ path('app_invoice', {status: 'en_attente'}) }}" class="px-4 py-2 rounded-full text-sm font-medium transition {{ currentStatus == 'en_attente' ? 'bg-blue-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-100' }}">En attente</a>
+        <a href="{{ path('app_invoice', {status: 'payées'}) }}" class="px-4 py-2 rounded-full text-sm font-medium transition {{ currentStatus == 'payées' ? 'bg-blue-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-100' }}">Payées</a>
+    </div>
+    <table class="w-full bg-white rounded-lg shadow-md">
+        <thead>
+            <tr>
+                <th class="py-3 px-6 bg-gray-100 text-left text-sm font-semibold text-gray-900">Numéro</th>
+                <th class="py-3 px-6 bg-gray-100 text-left text-sm font-semibold text-gray-900">Date</th>
+                <th class="py-3 px-6 bg-gray-100 text-left text-sm font-semibold text-gray-900">Client</th>
+                <th class="py-3 px-6 bg-gray-100 text-left text-sm font-semibold text-gray-900">Total TTC</th>
+                <th class="py-3 px-6 bg-gray-100 text-left text-sm font-semibold text-gray-900">Statut</th>
+                <th class="py-3 px-6 bg-gray-100 text-left text-sm font-semibold text-gray-900">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for invoice in invoices %}
+            <tr class="border-t">
+                <td class="py-4 px-6">{{ invoice.number }}</td>
+                <td class="py-4 px-6">{{ invoice.createAt|date('d/m/Y') }}</td>
+                <td class="py-4 px-6">{{ invoice.client.name }}</td>
+                <td class="py-4 px-6">{{ invoice.totalTtc }}</td>
+                <td class="py-4 px-6">
+                {% if invoice.status == 'brouillons' %}
+                    <span class="bg-gray-200 text-gray-600 py-1 px-3 rounded-full text-sm">Brouillons</span>
+                {% elseif invoice.status == 'en_attente' %}
+                    <span class="bg-yellow-200 text-yellow-700 py-1 px-3 rounded-full text-sm">En attente</span>
+                {% elseif invoice.status == 'payées' %}
+                    <span class="bg-green-200 text-green-700 py-1 px-3 rounded-full text-sm">Payées</span>
+                {% endif %}
+                </td>
+                <td class="py-4 px-6">
+                    <div class="flex items-center gap-4">
+                        <a href="{{ path('app_invoice_edit', {id: invoice.id}) }}" class="text-blue-500 hover:text-blue-700">
+                            <i class="fa-solid fa-pen text-lg"></i>
+                        </a>
+                    <form method="post" action="{{ path('app_invoice_delete', {'id': invoice.id}) }}" style="display:inline;" onsubmit="return confirm('Supprimer cette facture ?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ invoice.id) }}">
+                        <button type="submit"  class="text-red-500 hover:text-red-700 cursor-pointer">
+                            <i class="fa-solid fa-trash-can text-lg"></i>
+                        </button>
+                    </form>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4" class="py-4 px-6 text-center text-gray-500">Aucune facture trouvée.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+</section>
 {% endblock %}
