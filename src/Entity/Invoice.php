@@ -17,16 +17,16 @@ class Invoice
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $number = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $status = null;
 
-    #[ORM\Column]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?float $totalTtc = null;
 
-    #[ORM\Column]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?\DateTime $createAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'invoices')]

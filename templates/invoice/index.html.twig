@@ -46,16 +46,13 @@
                 {% endif %}
                 </td>
                 <td class="py-4 px-6">
-                    <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-3">
                         <a href="{{ path('app_invoice_edit', {id: invoice.id}) }}" class="text-blue-500 hover:text-blue-700">
                             <i class="fa-solid fa-pen text-lg"></i>
                         </a>
-                    <form method="post" action="{{ path('app_invoice_delete', {'id': invoice.id}) }}" style="display:inline;" onsubmit="return confirm('Supprimer cette facture ?');">
-                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ invoice.id) }}">
-                        <button type="submit"  class="text-red-500 hover:text-red-700 cursor-pointer">
-                            <i class="fa-solid fa-trash-can text-lg"></i>
-                        </button>
-                    </form>
+                        <a href="{{ path('app_invoice_show', {id: invoice.id}) }}" class="text-blue-500 hover:text-blue-700 flex items-center gap-1">
+                            <i class="fa-solid fa-eye"></i> Détails
+                        </a>
                     </div>
                 </td>
             </tr>

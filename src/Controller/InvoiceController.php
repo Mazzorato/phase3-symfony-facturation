@@ -55,7 +55,7 @@ final class InvoiceController extends AbstractController
                 $entityManager->persist($product);
                 $entityManager->flush();
 
-                return $this->redirectToRoute('app_invoice_new');
+                return $this->redirectToRoute('app_invoice_edit', [ 'id' => $invoice->getId()]);
             }
         }
 
@@ -66,7 +66,7 @@ final class InvoiceController extends AbstractController
             $entityManager->persist($invoice);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_invoice', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_invoice_show',[ 'id' => $invoice->getId()], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('invoice/new.html.twig', [
@@ -111,5 +111,25 @@ final class InvoiceController extends AbstractController
         }
 
         return $this->redirectToRoute('app_invoice', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/{id}/validate', name:'app_invoice_validate', methods: ['POST'])]
+    public function validate(Request $request, Invoice $invoice, EntityManagerInterface $entityManager): Response
+    {
+        if ($this->isCsrfTokenValid('validate' . $invoice->getId(), $request->getPayload()->getString('_token'))){
+            $invoice->setStatus('en_attente');
+            $entityManager->flush();
+        }
+        return $this->redirectToRoute('app_invoice_show', ['id' => $invoice->getId()]);
+    }
+
+    #[Route('/{id}/pay', name: 'app_invoice_pay', methods: ['POST'])]
+    public function pay(Request $request, Invoice $invoice, EntityManagerInterface $entityManager): Response
+    {
+        if ($this->isCsrfTokenValid('pay' . $invoice->getId(), $request->getPayload()->getString('_token'))){
+            $invoice->setStatus('payées');
+            $entityManager->flush();
+        }
+        return $this->redirectToRoute('app_invoice_show', ['id' => $invoice->getId()]);
     }
 }
