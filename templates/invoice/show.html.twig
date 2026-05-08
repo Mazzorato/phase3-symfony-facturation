@@ -1,73 +1,157 @@
 {% extends 'base.html.twig' %}
-
 {% block title %}Facture {{ invoice.number }}{% endblock %}
 {% block body %}
-<section class="bg-gray-100 min-h-screen p-8"> 
+<section class="bg-gray-100 min-h-screen p-8">
+
     <div class="mb-4">
         <a href="{{ path('app_invoice') }}" class="text-gray-500 hover:text-gray-700 text-sm flex items-center gap-2">
             <i class="fa-solid fa-arrow-left"></i> Retour aux factures
         </a>
     </div>
 
-
-    <div class="flex justify-between items-start mb-4">
+    <div class="flex justify-between items-start mb-6">
         <div>
             <div class="flex items-center gap-3">
                 <h1 class="text-2xl font-bold text-gray-800">Facture {{ invoice.number }}</h1>
                 {% if invoice.status == 'brouillons' %}
-                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-600 items-center gap-1">
-                        <i class="fa-regular fa-clock"></i>Brouillon
+                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                        <i class="fa-regular fa-clock"></i> Brouillon
                     </span>
                 {% elseif invoice.status == 'en_attente' %}
-                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-600 items-center gap-1">
-                        <i class="fa-regular fa-clock"></i>En attente
+                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-600">
+                        <i class="fa-regular fa-clock"></i> En attente
                     </span>
-                {% elseif invoice.status == 'payées'%}
-                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-600 items-center gap-1">
-                        <i class="fa-regular fa-circle-check"></i>Payée 
+                {% elseif invoice.status == 'payées' %}
+                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-600">
+                        <i class="fa-solid fa-circle-check"></i> Payée
                     </span>
                 {% endif %}
             </div>
-
-        {% if invoice.createAt %}
-        <p class="text-sm text-gray-500 mt-1">Date: {{ invoice.createAt|date('d/m/Y') }} </p>
-        {% endif %}
+            {% if invoice.createAt %}
+            <p class="text-sm text-gray-500 mt-1">Date : {{ invoice.createAt|date('d/m/Y') }}</p>
+            {% endif %}
         </div>
 
         <div class="flex gap-3">
-        {% if invoice.status  == 'brouillon' %}
-            <form method="post" action=" {{ path('app_invoice_validate') }}, {id: invoice.id}">
-                <input type="hidden" name="_token" value="{{ csrf_token('validate' ~ invoice.id ) }}">
-                <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
-                    <i class="fa-regular fa-floppy-disk"></i>Valider la facture
+            {% if invoice.status == 'brouillons' %}
+                <form method="post" action="{{ path('app_invoice_validate', {id: invoice.id}) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('validate' ~ invoice.id) }}">
+                    <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+                        <i class="fa-regular fa-floppy-disk"></i> Valider la facture
+                    </button>
+                </form>
+                <form method="post" action="{{ path('app_invoice_delete', {id: invoice.id}) }}" onsubmit="return confirm('Supprimer cette facture ?')">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ invoice.id) }}">
+                    <button type="submit" class="flex items-center gap-2 px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50">
+                        <i class="fa-solid fa-trash"></i> Supprimer
+                    </button>
+                </form>
+            {% elseif invoice.status == 'en_attente' %}
+                <button class="flex items-center gap-2 px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50">
+                    <i class="fa-regular fa-file-pdf"></i> PDF
                 </button>
-            </form>
-            <form method="post" action=" {{ path('app_invoice_delete') }}, {id: invoice.id}">
-                <input type="hidden" name="_token" value=" {{ csrf_token('validate' ~ invoice.id ) }}">
-                <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
-                    <i class="fa-regular fa-trash"</i>Supprimer
+                <button class="flex items-center gap-2 px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50">
+                    <i class="fa-regular fa-paper-plane"></i> Envoyer
                 </button>
-            </form>
-        {% elseif invoice.status == 'en_attente'%}
-            <button class="flex items-center gap-2 px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50">
-                <i class="fa-regular fa-file-pdf"></i>PDF
-            </button>
-            <button class="flex items-center gap-2 px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50">
-                <i class="fa-regular fa-paper-plane"></i>Envoyer
-            </button>
-            <form method="post" action="{{ path('app_invoice_pay') }}, {id: invoice.id}">
-                <input type="hidden" name="_token" value=" {{ csrf_token('validate' ~ invoice.id ) }}">
-                <button type="submit""
-            </form>  
-        {% endif %}
+                <form method="post" action="{{ path('app_invoice_pay', {id: invoice.id}) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('pay' ~ invoice.id) }}">
+                    <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+                        <i class="fa-solid fa-euro-sign"></i> Valider le paiement
+                    </button>
+                </form>
+            {% elseif invoice.status == 'payées' %}
+                <button class="flex items-center gap-2 px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50">
+                    <i class="fa-regular fa-file-pdf"></i> PDF
+                </button>
+                <button class="flex items-center gap-2 px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50">
+                    <i class="fa-regular fa-paper-plane"></i> Envoyer
+                </button>
+            {% endif %}
         </div>
     </div>
 
-    
+    <div class="bg-white rounded-xl shadow-sm p-8">
 
+        <div class="flex justify-between mb-8">
+            <div>
+                <p class="font-bold text-lg">{{ app.user.email }}</p>
+            </div>
+            <div class="text-right">
+                <p class="font-bold text-xl tracking-widest">FACTURE</p>
+                <p class="text-sm text-gray-600">N° {{ invoice.number }}</p>
+                {% if invoice.createAt %}
+                <p class="text-sm text-gray-600">Date : {{ invoice.createAt|date('d/m/Y') }}</p>
+                {% endif %}
+            </div>
+        </div>
 
-    <a href="{{ path('app_invoice_edit', {'id': invoice.id}) }}">Modifier</a>
+        {% if invoice.client %}
+        <div class="bg-gray-50 rounded-lg p-6 mb-8 ml-auto" style="max-width: 350px">
+            <p class="text-xs text-gray-400 uppercase tracking-widest mb-2">Facturé à</p>
+            <p class="font-bold text-lg">{{ invoice.client.name }}</p>
+            {% if invoice.client.address %}
+            <p class="text-sm text-gray-600">{{ invoice.client.address }}</p>
+            {% endif %}
+            {% if invoice.client.email %}
+            <p class="text-sm text-gray-600">{{ invoice.client.email }}</p>
+            {% endif %}
+            {% if invoice.client.siret %}
+            <p class="text-sm text-gray-600">SIRET : {{ invoice.client.siret }}</p>
+            {% endif %}
+        </div>
+        {% endif %}
 
-    {{ include('invoice/_delete_form.html.twig') }}
+        <table class="w-full mb-6">
+            <thead>
+                <tr class="border-b">
+                    <th class="text-left py-3 text-sm font-semibold text-gray-700">Description</th>
+                    <th class="text-right py-3 text-sm font-semibold text-gray-700">Qté</th>
+                    <th class="text-right py-3 text-sm font-semibold text-gray-700">Prix Unitaire</th>
+                    <th class="text-right py-3 text-sm font-semibold text-gray-700">Total TTC</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set total = 0 %}
+                {% for product in invoice.products %}
+                    {% set total = total + (product.price * product.quantity) %}
+                <tr class="border-b">
+                    <td class="py-4">
+                        <div class="font-medium">{{ product.name }}</div>
+                        <div class="text-sm text-gray-400">{{ product.description }}</div>
+                    </td>
+                    <td class="text-right py-4">{{ product.quantity }}</td>
+                    <td class="text-right py-4">{{ product.price }} €</td>
+                    <td class="text-right py-4 font-bold">{{ product.price * product.quantity }} €</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="flex justify-end mb-6">
+            <div class="w-64">
+                <div class="flex justify-between py-2 text-sm text-gray-600">
+                    <span>Total HT</span>
+                    <span>{{ total }} €</span>
+                </div>
+                <div class="flex justify-between py-2 font-bold border-t">
+                    <span>Total TTC</span>
+                    <span class="text-lg">{{ total }} €</span>
+                </div>
+                <p class="text-xs text-gray-400 text-right">TVA non applicable, art. 293 B du CGI</p>
+            </div>
+        </div>
+
+        {% if invoice.client and invoice.client.rib %}
+        <div>
+            <p class="text-sm font-medium text-gray-700 mb-2">Conditions de paiement</p>
+            <div class="bg-gray-50 rounded-lg p-4">
+                <p class="text-sm text-gray-600">Coordonnées bancaires pour le paiement :</p>
+                <p class="text-sm font-medium">{{ invoice.client.rib }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
 </section>
 {% endblock %}

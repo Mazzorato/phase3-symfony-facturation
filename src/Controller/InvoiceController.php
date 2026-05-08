@@ -37,27 +37,27 @@ final class InvoiceController extends AbstractController
     {
         $invoice = new Invoice();
         $form = $this->createForm(InvoiceType::class, $invoice);
-        $form->handleRequest($request);
-
+        
         if($request->request->has('add_line')){
             $productId = $request->request->get('product_id');
             $quantity = $request->request->get('quantity', 1);
             $unitPrice = $request->request->get('unit_price');
-
+            
             $product = $productRepository->find($productId);
-
+            
             if ($product) { 
                 $product->setQuantity($quantity);
                 $product->setPrice($unitPrice);
                 $invoice->addProduct($product);
-
+                
                 $entityManager->persist($invoice);
                 $entityManager->persist($product);
                 $entityManager->flush();
-
+                
                 return $this->redirectToRoute('app_invoice_edit', [ 'id' => $invoice->getId()]);
             }
         }
+        $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $status = $request->request->get('status');
@@ -85,20 +85,41 @@ final class InvoiceController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_invoice_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Invoice $invoice, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, Invoice $invoice, EntityManagerInterface $entityManager,ProductRepository $productRepository ): Response
     {
+        if ($invoice->getStatus() !== 'brouillons') {
+            return $this->redirectToRoute('app_invoice_show', ['id' => $invoice->getId()]);
+        }
         $form = $this->createForm(InvoiceType::class, $invoice);
-        $form->handleRequest($request);
+        
+        if ($request->request->has('add_line')){
+            $productId = $request->request->get('product_id');
+            $quantity = $request->request->get('quantity', 1);
+            $unitPrice = $request->request->get('unit_price');
+            $product = $productRepository->find($productId);
+            
+            if($product) {
+                $product->setQuantity($quantity);
+                $product->setPrice($unitPrice);
+                $invoice->addProduct($product);
+                $entityManager->flush();
+                }
+                return $this->redirectToRoute('app_invoice_edit', ['id' => $invoice->getId()]);
+            }
+            $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $status = $request->request->get('status');
+            $invoice->setStatus($status);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_invoice', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_invoice_show', ['id' => $invoice->getId()], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('invoice/edit.html.twig', [
             'invoice' => $invoice,
             'form' => $form,
+            'products' => $productRepository->findAll(),
         ]);
     }
 
