@@ -33,7 +33,7 @@ final class InvoiceController extends AbstractController
     }
 
     #[Route('/new', name: 'app_invoice_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, ProductRepository $productRepository): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, ProductRepository $productRepository, InvoiceRepository $invoiceRepository): Response
     {
         $invoice = new Invoice();
         $form = $this->createForm(InvoiceType::class, $invoice);
@@ -62,6 +62,11 @@ final class InvoiceController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $status = $request->request->get('status');
             $invoice->setStatus($status);
+
+            $date = new \DateTime();
+            $count = $invoiceRepository->countInvoicesThisMonth() + 1;
+            $invoice->setNumber('FACT-' . $date->format('Ymd') . '-' . $count);
+            $invoice->setCreateAt($date);
 
             $entityManager->persist($invoice);
             $entityManager->flush();
