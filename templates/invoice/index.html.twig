@@ -34,7 +34,7 @@
             <tr class="border-t">
                 <td class="py-4 px-6">{{ invoice.number }}</td>
                 <td class="py-4 px-6">{{ invoice.createAt|date('d/m/Y') }}</td>
-                <td class="py-4 px-6">{{ invoice.client.name }}</td>
+                <td class="py-4 px-6">{{ invoice.client ? invoice.client.name }}</td>
                 <td class="py-4 px-6">{{ invoice.totalTtc }}</td>
                 <td class="py-4 px-6">
                 {% if invoice.status == 'brouillons' %}

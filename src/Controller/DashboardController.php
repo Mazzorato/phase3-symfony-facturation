@@ -37,6 +37,7 @@ final class DashboardController extends AbstractController
             ],
         ]);
         $chart->setOptions([
+            'maintainAspectRatio' => false,
             'scales' => [
                 'y' => [
                     'beginAtZero' => true,
