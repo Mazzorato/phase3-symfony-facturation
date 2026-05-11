@@ -15,7 +15,7 @@
             <i class="fa-solid fa-euro-sign text-green-600"></i>
         </div>
             <p class="text-sm text-gray-500">Chiffre d'affaires (Payé)</p>
-            <p class="text-2xl font-bold text-gray-900">total payé €</p>
+            <p class="text-2xl font-bold text-gray-900">{{ totalPaid }} €</p>
         </div>
 
         <div class="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-3 shadow-sm">
@@ -23,7 +23,7 @@
                 <i class="fa-solid fa-file text-orange-600"></i>
             </div>
             <p class="text-sm text-gray-500">Factures en attente de paiement</p>
-            <p class="text-2xl font-bold text-gray-900">1</p>
+            <p class="text-2xl font-bold text-gray-900">{{ pendingCount }}</p>
         </div>
 
         <div class="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-3 shadow-sm">
@@ -31,7 +31,7 @@
                 <i class="fa-solid fa-users text-blue-600"></i>
             </div>
             <p class="text-sm text-gray-500">Total client </p>
-            <p class="text-2xl font-bold text-gray-900">2</p>
+            <p class="text-2xl font-bold text-gray-900">{{ clientCount }}</p>
         </div>
 
         <div class="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-3 shadow-sm">
@@ -39,20 +39,24 @@
                 <i class="fa-solid fa-box-open text-purple-600"></i>
             </div>
             <p class="text-sm text-gray-500">Total produits</p>
-            <p class="text-2xl font-bold text-gray-900">3</p>
+            <p class="text-2xl font-bold text-gray-900">{{ productCount }}</p>
         </div>
     </div>
 
      <div class="w-full bg-white rounded-xl border border-gray-200 p-6 mb-8 shadow-sm">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-lg font-bold text-gray-800">Chiffre d'affaires mensuel (Factures payées)</h2>
-            <select class="border border-gray-200 text-gray-600 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer">
-                <option value="2023">2023</option>
-                <option value="2022">2022</option>
-            </select>
+            <form method="get">
+                <select name="year" onchange="this.form.submit" class="border border-gray-200 text-gray-600 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer">
+                    {% for y in range("now"|date('Y')-2, "now"|date('Y')) %}
+                        <option value="{{ y }}" {{ y == year ? 'selected' : ''}}>{{ y }}</option>
+                    {% endfor %}
+                </select>
+            </form>
         </div>
-            <img src="{{ asset('BarChart.png') }}" alt="BarChart" class="w-full h-64 object-cover rounded-lg">
-            
+        <div style="height: 250px; position: relative;">
+            {{ render_chart(chart, { 'style': 'height: 250px'}) }}
+        </div
             </div>
         </div> 
     

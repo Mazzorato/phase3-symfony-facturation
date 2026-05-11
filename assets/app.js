@@ -5,6 +5,19 @@ import './stimulus_bootstrap.js';
  * This file will be included onto the page via the importmap() Twig function,
  * which should already be in your base.html.twig.
  */
+
+document.addEventListener('chartjs:pre-connect', function(event) {
+    event.detail.config.options.scales.y.ticks = {
+        callback: function(value) {
+            return value + '€';
+        }
+    };
+});
+
+document.querySelector('select[name="year"]')?.addEventListener('change', function() {
+    this.form.submit();
+});
+
 import './styles/app.css';
 
 console.log('This log comes from assets/app.js - welcome to AssetMapper! 🎉');
