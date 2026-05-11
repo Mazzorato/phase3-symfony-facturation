@@ -24,7 +24,11 @@
             {{ form_widget(form.cgv, {attr: {class: 'h-32 border border-gray-300 rounded-lg px-4 py-2.5 text-sm', placeholder: 'Ces conditions apparaîtront en bas de vos factures PDF...'}}) }}
         </div>
         <div class="flex justify-start mt-6">
-            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">Enregistrer les modifications</button>
+        <a href="{{ path('app_dashboard') }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+            {# <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"> #}
+            Enregistrer les modifications
+            {# </button> #}
+        </a>
         </div>
         {{ form_end(form) }}
     </div>
