@@ -8,6 +8,8 @@ use App\Form\InvoiceType;
 use App\Repository\InvoiceRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensiolabs\GotenbergBundle\GotenbergPdfInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -191,5 +193,45 @@ final class InvoiceController extends AbstractController
         ->content('invoice/pdf.html.twig', ['invoice' => $invoice])
         ->generate()
         ->stream();
+    }
+
+    #[Route('/{id}/send', name: 'app_invoice_send', methods: ['POST'])]
+    public function send( Request $request, Invoice $invoice, GotenbergPdfInterface $gotenberg, MailerInterface $mailer) : Response 
+    {   
+        $user = $this->getUser();
+
+        if (!$user) {
+            throw $this->createAccessDeniedException('Vous devez être connecté.');
+        }
+        if ($invoice->getStatus() === 'brouillons' || $invoice->getStatus() === null) {
+            return $this->redirectToRoute('app_invoice_show', ['id' => $invoice->getId()]);
+            }
+
+        if ($this->isCsrfTokenValid('send' . $invoice->getId(), $request->getPayload()->getString('_token'))){
+
+            $pdfPath = $this->getParameter('kernel.project.dir') . 'var/facture-' . $invoice->getNumber() . '.pdf';
+
+            $gotenberg->html()
+            ->content('invoice/pdf.html.twig', ['invoice' => $invoice])
+            ->processor(new \Sensiolabs\GotenbergBundle\Processor\FileProcessor(new \Symfony\Component\Filesystem\Filesystem(), $pdfPath))
+            ->generate()
+            ->process();
+
+            $email = (new Email())
+                ->from($this->getUser()->getEmail())
+                ->to($invoice->getClient()->getEmail())
+                ->subject('Facture N°' . $invoice->getNumber())
+                ->text("Bonjour" . $invoice->getClient()->getName() . ",\n\n Veuillez trouvez ci-joint votre facture.\n\n Cordialement,\n" . $user->getCompanyName())
+                ->attachFromPath($pdfPath, 'Facture-' . $invoice->getNumber() . '.pdf' , 'application/pdf');
+
+                $mailer->send($email);
+
+                if(file_exists($pdfPath)){
+                    unlink($pdfPath);
+                }
+
+                $this->addFlash('success', 'La facture a bien été envoyée au client.');
+        }
+        return $this->redirectToRoute('app_invoice_show', ['id' => $invoice->getId()]);
     }
 }
