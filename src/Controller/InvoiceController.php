@@ -45,7 +45,7 @@ final class InvoiceController extends AbstractController
             $product = $productRepository->find($productId);
             
             if ($product) { 
-                $invoice->SetStatus('brouillon');
+                $invoice->SetStatus('brouillons');
                 $product->setQuantity($quantity);
                 $product->setPrice($unitPrice);
                 $invoice->addProduct($product);
@@ -99,10 +99,6 @@ final class InvoiceController extends AbstractController
     public function edit(Request $request, Invoice $invoice, EntityManagerInterface $entityManager, ProductRepository $productRepository, InvoiceRepository $invoiceRepository): Response
     {
 
-    if ($invoice->getStatus() !== 'brouillons' && $invoice->getStatus() !== null) {
-        return $this->redirectToRoute('app_invoice_show', ['id' => $invoice->getId()]);
-    }
-
     $form = $this->createForm(InvoiceType::class, $invoice);
 
     if ($request->request->has('add_line')) {
@@ -151,6 +147,10 @@ final class InvoiceController extends AbstractController
     #[Route('/{id}', name: 'app_invoice_delete', methods: ['POST'])]
     public function delete(Request $request, Invoice $invoice, EntityManagerInterface $entityManager): Response
     {
+        if ($invoice->getStatus() !== 'brouillon' && $invoice->getStatus() !== null) {
+            $this->addFlash('error', 'Seules les factures en brouillon peuvent être supprimées');
+            return $this->redirectToRoute('app_invoice_show', [ 'id' => $invoice->getID()]);
+        }
         if ($this->isCsrfTokenValid('delete'.$invoice->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($invoice);
             $entityManager->flush();
