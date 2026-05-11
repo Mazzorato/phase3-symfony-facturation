@@ -50,9 +50,12 @@
             <button class="flex items-center gap-2 px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50">
                     <i class="fa-regular fa-file-pdf"></i> PDF
                 </button>
-                <button class="flex items-center gap-2 px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50">
+                <form method="post" action="{{ path('app_invoice_send', {id: invoice.id}) }}" style="display:inline-block;">
+                <input type="hidden" name="_token" value="{{ csrf_token('send' ~ invoice.id)  }}">
+                <button type="submit" class="flex items-center gap-2 px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50">
                     <i class="fa-regular fa-paper-plane"></i> Envoyer
                 </button>
+                </form>
                 <form method="post" action="{{ path('app_invoice_pay', {id: invoice.id}) }}" submit="return confirm ("Êtes-vous sûr de vouloir marquer cette facture comme payée? Cette action est irréversible.");">
                     <input type="hidden" name="_token" value="{{ csrf_token('pay' ~ invoice.id) }}">
                     <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
@@ -61,13 +64,14 @@
                 </form>
             {% elseif invoice.status == 'payées' %}
                 <a href="{{ path('app_invoice_pdf', {id: invoice.id}) }}" class="flex items-center gap-2 px-4 py-2 border border-gray bg-white text-gray-700 rounded-lg hover:bg-gray-50"> 
-                {# <button class="flex items-center gap-2 px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50"> #}
-                    <i class="fa-regular fa-file-pdf"></i> PDF
+                <i class="fa-regular fa-file-pdf"></i> PDF
                 </a>
-                {# </button> #}
+                <form method="post" action="{{ path('app_invoice_send', {id: invoice.id}) }}" style="display:inline-block;">
+                <input type="hidden" name="_token" value="{{ csrf_token('send' ~ invoice.id) }}">
                 <button class="flex items-center gap-2 px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50">
                     <i class="fa-regular fa-paper-plane"></i> Envoyer
                 </button>
+                </form>
             {% endif %}
         </div>
     </div>
