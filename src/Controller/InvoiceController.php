@@ -14,6 +14,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
+use App\Entity\User;
 
 #[Route('/invoice')]
 final class InvoiceController extends AbstractController
@@ -196,9 +198,9 @@ final class InvoiceController extends AbstractController
     }
 
     #[Route('/{id}/send', name: 'app_invoice_send', methods: ['POST'])]
-    public function send( Request $request, Invoice $invoice, GotenbergPdfInterface $gotenberg, MailerInterface $mailer) : Response 
+    public function send( Request $request, Invoice $invoice, GotenbergPdfInterface $gotenberg, MailerInterface $mailer,#[CurrentUser()] User $user) : Response 
     {   
-        $user = $this->getUser();
+        
 
         if (!$user) {
             throw $this->createAccessDeniedException('Vous devez être connecté.');
@@ -218,7 +220,7 @@ final class InvoiceController extends AbstractController
             ->process();
 
             $email = (new Email())
-                ->from($this->getUser()->getEmail())
+                ->from($user->getEmail())
                 ->to($invoice->getClient()->getEmail())
                 ->subject('Facture N°' . $invoice->getNumber())
                 ->text("Bonjour" . $invoice->getClient()->getName() . ",\n\n Veuillez trouvez ci-joint votre facture.\n\n Cordialement,\n" . $user->getCompanyName())
