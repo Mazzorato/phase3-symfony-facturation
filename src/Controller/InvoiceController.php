@@ -7,6 +7,7 @@ use App\Entity\Invoice;
 use App\Form\InvoiceType;
 use App\Repository\InvoiceRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Sensiolabs\GotenbergBundle\GotenbergPdfInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -177,5 +178,18 @@ final class InvoiceController extends AbstractController
             $entityManager->flush();
         }
         return $this->redirectToRoute('app_invoice_show', ['id' => $invoice->getId()]);
+    }
+
+    #[Route('/{id}/pdf', name: 'app_invoice_pdf', methods: ['GET'])]
+    public function pdf(Invoice $invoice, GotenbergPdfInterface $gotenberg) : Response
+    {
+        if ($invoice->getStatus() === 'brouillons' || $invoice->getStatus() === null) {
+            return $this->redirectToRoute('app_invoice_show', ['id' => $invoice->getId()]);
+        }
+
+        return $gotenberg->html()
+        ->content('invoice/pdf.html.twig', ['invoice' => $invoice])
+        ->generate()
+        ->stream();
     }
 }

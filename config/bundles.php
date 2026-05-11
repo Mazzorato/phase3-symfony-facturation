@@ -15,4 +15,5 @@ return [
     Symfony\Bundle\MakerBundle\MakerBundle::class => ['dev' => true],
     Symfony\UX\Chartjs\ChartjsBundle::class => ['all' => true],
     Symfonycasts\TailwindBundle\SymfonycastsTailwindBundle::class => ['all' => true],
+    Sensiolabs\GotenbergBundle\SensiolabsGotenbergBundle::class => ['all' => true],
 ];
