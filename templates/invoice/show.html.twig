@@ -46,8 +46,8 @@
                         <i class="fa-solid fa-trash"></i> Supprimer
                     </button>
                 </form>
-            {% elseif invoice.status == 'en_attente' %}
-                <button class="flex items-center gap-2 px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50">
+            {% elseif invoice.status == 'en_attente' %}                
+            <button class="flex items-center gap-2 px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50">
                     <i class="fa-regular fa-file-pdf"></i> PDF
                 </button>
                 <button class="flex items-center gap-2 px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50">
@@ -60,9 +60,11 @@
                     </button>
                 </form>
             {% elseif invoice.status == 'payées' %}
-                <button class="flex items-center gap-2 px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50">
+                <a href="{{ path('app_invoice_pdf', {id: invoice.id}) }}" class="flex items-center gap-2 px-4 py-2 border border-gray bg-white text-gray-700 rounded-lg hover:bg-gray-50"> 
+                {# <button class="flex items-center gap-2 px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50"> #}
                     <i class="fa-regular fa-file-pdf"></i> PDF
-                </button>
+                </a>
+                {# </button> #}
                 <button class="flex items-center gap-2 px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50">
                     <i class="fa-regular fa-paper-plane"></i> Envoyer
                 </button>
