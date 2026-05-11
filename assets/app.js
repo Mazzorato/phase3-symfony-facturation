@@ -14,6 +14,10 @@ document.addEventListener('chartjs:pre-connect', function(event) {
     };
 });
 
+document.querySelector('select[name="year"]')?.addEventListener('change', function() {
+    this.form.submit();
+});
+
 import './styles/app.css';
 
 console.log('This log comes from assets/app.js - welcome to AssetMapper! 🎉');
