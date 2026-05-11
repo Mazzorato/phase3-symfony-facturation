@@ -63,11 +63,11 @@ class InvoiceRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
 
-        $monthly = array_fill(1, 12, 0);
+        $monthly = array_fill(1, 12, 0.0);
         foreach ($invoices as $invoice){
             if ($invoice->getCreateAt() && $invoice->getCreateAt()->format('Y') == $year){
                 $month = (int) $invoice->getCreateAt()->format('n');
-                $monthly[$month] += $invoice->getTotalTtc() ?? 0;
+                $monthly[$month] += $invoice->getTotalTtc() ?? 0.0;
             }
         }
 

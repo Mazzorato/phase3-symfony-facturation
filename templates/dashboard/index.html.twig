@@ -1,21 +1,20 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello DashboardController!{% endblock %}
+{% block title %}Dashboard{% endblock %}
 
 {% block body %}
-<section class="bg-gray-100 h-screen p-8 w-full">
+<section class="bg-gray-100 min-h-screen p-8 w-full">
     <div class="w-full mb-8"> 
-    <h1 class=" text-3xl font-bold text-gray-800">Dashboard</h1> 
+        <h1 class="text-3xl font-bold text-gray-800">Dashboard</h1> 
     </div>
-
 
     <div class="w-full grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div class="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-3 shadow-sm">
             <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-            <i class="fa-solid fa-euro-sign text-green-600"></i>
-        </div>
+                <i class="fa-solid fa-euro-sign text-green-600"></i>
+            </div>
             <p class="text-sm text-gray-500">Chiffre d'affaires (Payé)</p>
-            <p class="text-2xl font-bold text-gray-900">{{ totalPaid }} €</p>
+            <p class="text-2xl font-bold text-gray-900">{{ annualTotal }} €</p>
         </div>
 
         <div class="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-3 shadow-sm">
@@ -30,7 +29,7 @@
             <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                 <i class="fa-solid fa-users text-blue-600"></i>
             </div>
-            <p class="text-sm text-gray-500">Total client </p>
+            <p class="text-sm text-gray-500">Total client</p>
             <p class="text-2xl font-bold text-gray-900">{{ clientCount }}</p>
         </div>
 
@@ -43,33 +42,32 @@
         </div>
     </div>
 
-     <div class="w-full bg-white rounded-xl border border-gray-200 p-6 mb-8 shadow-sm">
+    <div class="w-full bg-white rounded-xl border border-gray-200 p-6 mb-8 shadow-sm">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-lg font-bold text-gray-800">Chiffre d'affaires mensuel (Factures payées)</h2>
             <form method="get">
-                <select name="year" onchange="this.form.submit" class="border border-gray-200 text-gray-600 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer">
-                    {% for y in range("now"|date('Y')-2, "now"|date('Y')) %}
+                <select name="year" onchange="this.form.submit()" class="border border-gray-200 text-gray-600 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer hover:bg-gray-50">
+                    {% for y in range("now"|date('Y') - 2, "now"|date('Y') + 1) %}
                         <option value="{{ y }}" {{ y == year ? 'selected' : ''}}>{{ y }}</option>
                     {% endfor %}
                 </select>
             </form>
         </div>
-        <div style="height: 250px; position: relative;">
-            {{ render_chart(chart, { 'style': 'height: 250px'}) }}
-        </div
-            </div>
-        </div> 
+        <div style="height: 300px; position: relative;">
+            {{ render_chart(chart) }}
+        </div>
+    </div> 
     
-    <div class="w-full grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 ">
-        <a href="#" class="flex items-center justify-between p-6 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors border-gray-200 shadow-sm">
+    <div class="w-full grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <a href="{{ path('app_invoice_new') }}" class="group flex items-center justify-between p-6 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors border-gray-200 shadow-sm">
             <div>
                 <p class="text-lg font-bold text-blue-900">Créer une facture</p>
-                <p class="text-sm  text-blue-600">Nouvelle prestation</p>
+                <p class="text-sm text-blue-600">Nouvelle prestation</p>
             </div>
             <i class="fa-solid fa-arrow-right text-blue-600 group-hover:translate-x-1 transition-transform"></i>
         </a>
 
-        <a href="#" class="flex items-center justify-between p-6 bg-white rounded-xl hover:bg-gray-100 transition-colors border-gray-200 shadow-sm">
+        <a href="{{ path('app_client_new') }}" class="group flex items-center justify-between p-6 bg-white rounded-xl hover:bg-gray-100 transition-colors border-gray-200 shadow-sm">
             <div> 
                 <p class="text-lg font-bold text-gray-900">Ajouter un client</p>
                 <p class="text-sm text-gray-600">Gérer le répertoire des clients</p>
@@ -77,17 +75,17 @@
             <i class="fa-solid fa-arrow-right text-gray-500 group-hover:translate-x-1 transition-transform"></i>
         </a>
 
-        <a href="#" class="flex items-center justify-between p-6 bg-white rounded-xl hover:bg-gray-100 transition-colors border-gray-200 shadow-sm">
+        <a href="{{ path('app_product_new') }}" class="group flex items-center justify-between p-6 bg-white rounded-xl hover:bg-gray-100 transition-colors border-gray-200 shadow-sm">
             <div>
                 <p class="text-lg font-bold text-gray-900">Créer un produit/service</p>
                 <p class="text-sm text-gray-600">Enrichir le catalogue pour rediger rapidement vos factures</p>
             </div>
-            <i class="fa-solid fa-arrow-right text-gray-500 group-hover:translate-x-1 transition-transform"></i >
+            <i class="fa-solid fa-arrow-right text-gray-500 group-hover:translate-x-1 transition-transform"></i>
          </a>
     </div>
 
     <div class="w-full grid grid-cols-1 md:grid-cols-3 gap-6">
-        <a href="#" class="flex items-center justify-between p-6 bg-white rounded-xl hover:bg-gray-100 transition-colors border-gray-200 shadow-sm">
+        <a href="#" class="group flex items-center justify-between p-6 bg-white rounded-xl hover:bg-gray-100 transition-colors border-gray-200 shadow-sm">
             <div>
                 <p class="text-lg font-bold text-gray-900">Relancer tous les clients</p>
                 <p class="text-sm text-gray-600">Envoyer un mail à tous les clients en retard de paiement</p>
@@ -97,5 +95,3 @@
     </div>
 </section>
 {% endblock %}
-   
-

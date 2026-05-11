@@ -24,6 +24,7 @@ final class DashboardController extends AbstractController
         $year = (int) $request->query->get('year', date('Y'));
 
         $monthlyData = $invoiceRepository->getMonthlyRevenueByYear($year);
+        $annualTotal = array_sum($monthlyData);
 
         $chart = $chartBuilder->createChart(Chart::TYPE_BAR);
         $chart->setData([
@@ -62,8 +63,9 @@ final class DashboardController extends AbstractController
         return $this->render('dashboard/index.html.twig', [
             'chart' => $chart,
             'year' => $year,
+            'annualTotal' => $annualTotal,
             'totalPaid' => $totalPaid,
-            'pendingCount' => $pendingCount,
+            'pendingCount' => $invoiceRepository->count(['status' => 'en_attente']),
             'clientCount' => $clientCount,
             'productCount' => $productCount,
         ]);
