@@ -1,0 +1,38 @@
+<div {{ attributes }}>
+    <table class="w-full mb-6">
+        <thead>
+            <tr class="border-b">
+                <th class="text-left py-2 text-sm font-semibold text-gray-700">Produit/Service</th>
+                <th class="text-right py-2 text-sm font-semibold text-gray-700">Qté</th>
+                <th class="text-right py-2 text-sm font-semibold text-gray-700">Prix unitaire</th>
+                <th class="text-right py-2 text-sm font-semibold text-gray-700">Total</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in invoice.products %}
+                <tr class="border-b py-3">
+                    <td>
+                        <div class="font-medium">{{ product.name }}</div>
+                        <div class="text-sm text-gray-400">{{ product.description }}</div>
+                    </td>
+                    <td class="text-right  flex justify-end">
+                        <input type="number" name="quantity[{{ product.id }}]" data-model="quantity[{{ product.id }}]" min="1" class="w-20 border border-gray-300 rounded-lg px-2 py-1 text-right">
+                    </td>
+                    <td class="text-right ">{{ product.price }} €</td>
+                    <td class="text-right  font-medium">{{ (product.price * (product.quantity ?? 0))|number_format(2, '.', ' ') }} €</td>
+                    <td class="text-right">
+                        <button type="submit" name="remove_line" value="{{ product.id }}" class="text-red-500 hover:text-red-700">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            {% endfor %}    
+        </tbody>
+    </table>
+
+    <div class="flex justify-end mt-6">
+        <span class="font-semibold text-gray-700 mr-2">Total Facture (TTC): </span>
+        <span class="text-blue-600 font-bold text-xl">{{ this.grandTotal|number_format(2, '.', '') }} €</span>
+     </div>
+</div>

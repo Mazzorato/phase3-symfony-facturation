@@ -34,8 +34,8 @@
 
     <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
         <h2 class="text-lg font-semibold mb-4">Lignes de la facture</h2>
-
-        <table class="w-full mb-6">
+            <twig:invoice_lines :invoice="invoice" />
+        {# <table class="w-full mb-6">
             <thead>
                 <tr class="border-b">
                     <th class="text-left py-2 text-sm font-semibold text-gray-700">Produit / Service</th>
@@ -63,7 +63,7 @@
                 </tr>
                 {% endfor %}
             </tbody>
-        </table>
+        </table> #}
 
         <div class="flex gap-3 items-end">
             <div style="flex: 3">

@@ -123,7 +123,14 @@ final class InvoiceController extends AbstractController
     
         }
     if ($request->request->has('remove_line')){
-        $productId = $request->request->get('product_id');
+        $productId = $request->request->get('remove_line');
+        $product = $productRepository->find($productId);
+
+        if ($product){
+            $invoice->removeProduct($product);
+            $entityManager->flush();
+        }
+        return $this->redirectToRoute('app_invoice_edit', ['id' => $invoice->getId()]);
     }
 
     if ($request->isMethod('POST') && $request->request->has('status')) {
