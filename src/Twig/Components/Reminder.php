@@ -3,6 +3,7 @@
 namespace App\Twig\Components;
 
 use App\Repository\InvoiceRepository;
+use App\Service\EmailInvoiceService;
 use Symfony\Component\Filesystem\Filesystem;
 use Sensiolabs\GotenbergBundle\GotenbergPdfInterface;
 use Sensiolabs\GotenbergBundle\Processor\FileProcessor;
@@ -23,22 +24,25 @@ class Reminder
 
     #[LiveAction]
     public function sendAll(
+        EmailInvoiceService $emailService,
         InvoiceRepository $invoiceRepository,
         GotenbergPdfInterface $gotenberg,
         MailerInterface $mailer,
         Security $security,
         #[Autowire('%kernel.project_dir%')] string $projectDir
-    ): void {
+    ): void 
+    {
         
         /** @var \App\Entity\User $user */
         $user = ($security->getUser());
 
-            if (!$user) {
-                return;
-            }
+        if (!$user) {
+            return;
+        }
         $invoices = $invoiceRepository->findBy(['status' => 'en_attente']);
         $count = 0;
-
+        $emailService->sendAll($invoice);
+        
         foreach ($invoices as $invoice){
             $client = $invoice->getClient();
 
