@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Invoice;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -41,6 +42,28 @@ class InvoiceRepository extends ServiceEntityRepository
     //        ;
     //    }
 
+    public function findByUser(User $user): array
+    {
+        return $this->createQueryBuilder('i')
+            ->join('i.client', 'c')
+            ->where('c.user = :user')
+            ->setParameter('user', $user)
+            ->orderBy('i.id', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+    public function findByUserAndStatus(User $user, string $status): array
+    {
+        return $this->createQueryBuilder('i')
+            ->join('i.client', 'c')
+            ->where('c.user = :user')
+            ->andWhere('i.status = :status')
+            ->setParameter('user', $user)
+            ->setParameter('status', $status)
+            ->orderBy('i.id', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
     public function countInvoicesThisMonth(): int
     {
         $start = new \DateTime('first day of this month midnight');

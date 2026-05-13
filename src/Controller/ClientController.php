@@ -18,7 +18,7 @@ final class ClientController extends AbstractController
     public function index(ClientRepository $clientRepository): Response
     {
         return $this->render('client/index.html.twig', [
-            'client' => $clientRepository->findAll(),
+            'client' => $clientRepository->findByUser($this->getUser()),
         ]);
     }
 
@@ -30,6 +30,7 @@ final class ClientController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $client->setUser($this->getUser());
             $entityManager->persist($client);
             $entityManager->flush();
 
@@ -45,6 +46,9 @@ final class ClientController extends AbstractController
     #[Route('/{id}', name: 'app_client_show', methods: ['GET'])]
     public function show(Client $client): Response
     {
+        if ($client->getUser() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
         return $this->render('client/show.html.twig', [
             'client' => $client,
         ]);
@@ -53,6 +57,10 @@ final class ClientController extends AbstractController
     #[Route('/{id}/edit', name: 'app_client_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Client $client, EntityManagerInterface $entityManager): Response
     {
+        if ($client->getUser() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
+
         $form = $this->createForm(ClientType::class, $client);
         $form->handleRequest($request);
 
@@ -71,6 +79,10 @@ final class ClientController extends AbstractController
     #[Route('/{id}', name: 'app_client_delete', methods: ['POST'])]
     public function delete(Request $request, Client $client, EntityManagerInterface $entityManager): Response
     {
+        if ($client->getUser() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
+        
         if ($this->isCsrfTokenValid('delete'.$client->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($client);
             $entityManager->flush();

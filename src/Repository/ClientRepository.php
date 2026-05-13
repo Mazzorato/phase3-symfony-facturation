@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Client;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -40,4 +41,15 @@ class ClientRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+    public function findByUser(User $user): array
+    {
+        return $this->createQueryBuilder('c')
+            ->where('c.user =:user')
+            ->setParameter('user', $user)
+            ->orderBy('c.id', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+    }
 }
