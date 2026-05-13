@@ -21,6 +21,7 @@ final class DashboardController extends AbstractController
         ProductRepository $productRepository,
         ChartBuilderInterface $chartBuilder
     ): Response {
+        $user = $this->getUser();
         $year = (int) $request->query->get('year', date('Y'));
 
         $monthlyData = $invoiceRepository->getMonthlyRevenueByYear($year);
@@ -48,16 +49,11 @@ final class DashboardController extends AbstractController
             ],
         ]);
 
-        $totalPaid = $invoiceRepository->createQueryBuilder('i')
-            ->select('SUM(i.totalTtc)')
-            ->where('i.status = :status')
-            ->setParameter('status', 'payées')
-            ->getQuery()
-            ->getSingleScalarResult() ?? 0;
+        $totalPaid = $invoiceRepository->getTotalPaidByUser($user);
 
-        $pendingCount = count($invoiceRepository->findBy(['status' => 'en_attente']));
-        $clientCount = count($clientRepository->findAll());
-        $productCount = count($productRepository->findAll());
+        $pendingCount = count($invoiceRepository->findByUserAndStatus($user, 'en_attente'));
+        $clientCount = count($clientRepository->findByUser($user));
+        $productCount = count($productRepository->findByUser($user));
 
         return $this->render('dashboard/index.html.twig', [
             'chart' => $chart,

@@ -64,6 +64,18 @@ class InvoiceRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+    public function getTotalPaidByUser(User $user): float
+    {
+        return(float) $this->createQueryBuilder('i')
+        ->select('SUM(i.totalTtc)')
+        ->join('i.client', 'c')
+        ->where('c.user = :user')
+        ->andWhere('i.status = :status')
+        ->setParameter('user', $user)
+        ->setParameter('status', 'payées')
+        ->getQuery()
+        ->getSingleScalarResult() ?? 00;
+    }
     public function countInvoicesThisMonth(): int
     {
         $start = new \DateTime('first day of this month midnight');
