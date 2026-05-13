@@ -31,4 +31,10 @@ class InvoiceType extends AbstractType
             'data_class' => Invoice::class,
         ]);
     }
+    public function __toString()
+    {
+        throw new \Exception('Not implemented');
+    }
 }
+
+

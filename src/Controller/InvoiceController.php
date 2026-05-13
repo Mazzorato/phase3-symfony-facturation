@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Controller;
 
 use App\Repository\ProductRepository;
@@ -8,6 +7,8 @@ use App\Form\InvoiceType;
 use App\Repository\InvoiceRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensiolabs\GotenbergBundle\GotenbergPdfInterface;
+use Sensiolabs\GotenbergBundle\Processor\FileProcessor;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -23,12 +24,13 @@ final class InvoiceController extends AbstractController
     #[Route(name: 'app_invoice', methods: ['GET'])]
     public function index(InvoiceRepository $invoiceRepository, Request $request): Response
     {
+        $user = $this->getUser();
         $status = $request->query->get('status');
 
         if ($status) {
-            $invoices = $invoiceRepository->findBy(['status' => $status]);
+            $invoices = $invoiceRepository->findByUserAndStatus($user, $status);
         } else {
-            $invoices = $invoiceRepository->findAll();
+            $invoices = $invoiceRepository->findByUser($user);
         }
 
         return $this->render('invoice/index.html.twig', [
@@ -42,26 +44,27 @@ final class InvoiceController extends AbstractController
     {
         $invoice = new Invoice();
         $form = $this->createForm(InvoiceType::class, $invoice);
-        
-        if($request->request->has('add_line')){
+
+        if ($request->request->has('add_line')) {
             $productId = $request->request->get('product_id');
             $quantity = $request->request->get('quantity', 1);
-            $unitPrice = $request->request->get('unit_price');   
+            $unitPrice = $request->request->get('unit_price');
             $product = $productRepository->find($productId);
-            
-            if ($product) { 
-                $invoice->SetStatus('brouillons');
+
+            if ($product) {
+                $invoice->setStatus('brouillons');
                 $product->setQuantity($quantity);
                 $product->setPrice($unitPrice);
                 $invoice->addProduct($product);
-                
+
                 $entityManager->persist($invoice);
                 $entityManager->persist($product);
                 $entityManager->flush();
-                
-                return $this->redirectToRoute('app_invoice_edit', [ 'id' => $invoice->getId()]);
+
+                return $this->redirectToRoute('app_invoice_edit', ['id' => $invoice->getId()]);
             }
         }
+
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -82,19 +85,23 @@ final class InvoiceController extends AbstractController
             $entityManager->persist($invoice);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_invoice_show',[ 'id' => $invoice->getId()], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_invoice_show', ['id' => $invoice->getId()], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('invoice/new.html.twig', [
             'invoice' => $invoice,
             'form' => $form,
-            'products' => $productRepository->findAll(),
+            'products' => $productRepository->findByUser($this->getUser()), 
         ]);
     }
 
     #[Route('/{id}', name: 'app_invoice_show', methods: ['GET'])]
     public function show(Invoice $invoice): Response
     {
+        if ($invoice->getClient()?->getUser() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
+
         return $this->render('invoice/show.html.twig', [
             'invoice' => $invoice,
         ]);
@@ -103,59 +110,83 @@ final class InvoiceController extends AbstractController
     #[Route('/{id}/edit', name: 'app_invoice_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Invoice $invoice, EntityManagerInterface $entityManager, ProductRepository $productRepository, InvoiceRepository $invoiceRepository): Response
     {
+        
+        if ($invoice->getClient()?->getUser() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
 
-    $form = $this->createForm(InvoiceType::class, $invoice);
+        $form = $this->createForm(InvoiceType::class, $invoice);
 
-    if ($request->request->has('add_line')) {
-        $productId = $request->request->get('product_id');
-        $quantity = $request->request->get('quantity', 1);
-        $unitPrice = $request->request->get('unit_price');
-        $product = $productRepository->find($productId);
+        if ($request->request->has('add_line')) {
+            $productId = $request->request->get('product_id');
+            $quantity = $request->request->get('quantity', 1);
+            $unitPrice = $request->request->get('unit_price');
+            $product = $productRepository->find($productId);
 
-        if ($product) {
-            $product->setQuantity($quantity);
-            $product->setPrice($unitPrice);
-            $invoice->addProduct($product);
+            if ($product) {
+                $product->setQuantity($quantity);
+                $product->setPrice($unitPrice);
+                $invoice->addProduct($product);
+                $entityManager->flush();
+            }
+
+            return $this->redirectToRoute('app_invoice_edit', ['id' => $invoice->getId()]);
+        }
+
+        if ($request->request->has('remove_line')) {
+            $productId = $request->request->get('remove_line');
+            $product = $productRepository->find($productId);
+
+            if ($product) {
+                $invoice->removeProduct($product);
+                $entityManager->flush();
+            }
+
+            return $this->redirectToRoute('app_invoice_edit', ['id' => $invoice->getId()]);
+        }
+
+        if ($request->isMethod('POST') && $request->request->has('status')) {
+            $status = $request->request->get('status');
+            $invoice->setStatus($status);
+
+            $total = 0;
+            foreach ($invoice->getProducts() as $product) {
+                $total += $product->getPrice() * $product->getQuantity();
+            }
+            $invoice->setTotalTtc($total);
+
+            if (!$invoice->getNumber()) {
+                $date = new \DateTime();
+                $count = $invoiceRepository->countInvoicesThisMonth() + 1;
+                $invoice->setNumber('FACT-' . $date->format('Ymd') . '-' . $count);
+                $invoice->setCreateAt(new \DateTime());
+            }
+
             $entityManager->flush();
-        }
-        return $this->redirectToRoute('app_invoice_edit', ['id' => $invoice->getId()]);
-    }
 
-    if ($request->isMethod('POST') && $request->request->has('status')) {
-        $status = $request->request->get('status');
-        $invoice->setStatus($status);
-
-        $total = 0;
-        foreach ($invoice->getProducts() as $product) {
-            $total += $product->getPrice() * $product->getQuantity();
-        }
-        $invoice->setTotalTtc($total);
-
-        if (!$invoice->getNumber()) {
-            $date = new \DateTime();
-            $count = $invoiceRepository->countInvoicesThisMonth() + 1;
-            $invoice->setNumber('FACT-' . $date->format('Ymd') . '-' . $count);
-            $invoice->setCreateAt(new \DateTime());
+            return $this->redirectToRoute('app_invoice_show', ['id' => $invoice->getId()], Response::HTTP_SEE_OTHER);
         }
 
-        $entityManager->flush();
-        return $this->redirectToRoute('app_invoice_show', ['id' => $invoice->getId()], Response::HTTP_SEE_OTHER);
-    }
-
-    return $this->render('invoice/edit.html.twig', [
-        'invoice' => $invoice,
-        'form' => $form,
-        'products' => $productRepository->findAll(),
-    ]);
+        return $this->render('invoice/edit.html.twig', [
+            'invoice' => $invoice,
+            'form' => $form,
+            'products' => $productRepository->findByUser($this->getUser()), 
+        ]);
     }
 
     #[Route('/{id}', name: 'app_invoice_delete', methods: ['POST'])]
     public function delete(Request $request, Invoice $invoice, EntityManagerInterface $entityManager): Response
     {
+        
+        if ($invoice->getClient()?->getUser() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
+
         if ($invoice->getStatus() !== 'brouillon' && $invoice->getStatus() !== null) {
             $this->addFlash('error', 'Seules les factures en brouillon peuvent être supprimées');
-            return $this->redirectToRoute('app_invoice_show', [ 'id' => $invoice->getID()]);
+            return $this->redirectToRoute('app_invoice_show', ['id' => $invoice->getId()]);
         }
+
         if ($this->isCsrfTokenValid('delete'.$invoice->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($invoice);
             $entityManager->flush();
@@ -164,76 +195,93 @@ final class InvoiceController extends AbstractController
         return $this->redirectToRoute('app_invoice', [], Response::HTTP_SEE_OTHER);
     }
 
-    #[Route('/{id}/validate', name:'app_invoice_validate', methods: ['POST'])]
+    #[Route('/{id}/validate', name: 'app_invoice_validate', methods: ['POST'])]
     public function validate(Request $request, Invoice $invoice, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('validate' . $invoice->getId(), $request->getPayload()->getString('_token'))){
+       
+        if ($invoice->getClient()?->getUser() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        if ($this->isCsrfTokenValid('validate' . $invoice->getId(), $request->getPayload()->getString('_token'))) {
             $invoice->setStatus('en_attente');
             $entityManager->flush();
         }
+
         return $this->redirectToRoute('app_invoice_show', ['id' => $invoice->getId()]);
     }
 
     #[Route('/{id}/pay', name: 'app_invoice_pay', methods: ['POST'])]
     public function pay(Request $request, Invoice $invoice, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('pay' . $invoice->getId(), $request->getPayload()->getString('_token'))){
+        
+        if ($invoice->getClient()?->getUser() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        if ($this->isCsrfTokenValid('pay' . $invoice->getId(), $request->getPayload()->getString('_token'))) {
             $invoice->setStatus('payées');
             $entityManager->flush();
         }
+
         return $this->redirectToRoute('app_invoice_show', ['id' => $invoice->getId()]);
     }
 
     #[Route('/{id}/pdf', name: 'app_invoice_pdf', methods: ['GET'])]
-    public function pdf(Invoice $invoice, GotenbergPdfInterface $gotenberg) : Response
+    public function pdf(Invoice $invoice, GotenbergPdfInterface $gotenberg): Response
     {
+        
+        if ($invoice->getClient()?->getUser() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
+
         if ($invoice->getStatus() === 'brouillons' || $invoice->getStatus() === null) {
             return $this->redirectToRoute('app_invoice_show', ['id' => $invoice->getId()]);
         }
 
         return $gotenberg->html()
-        ->content('invoice/pdf.html.twig', ['invoice' => $invoice])
-        ->generate()
-        ->stream();
+            ->content('invoice/pdf.html.twig', ['invoice' => $invoice])
+            ->generate()
+            ->stream();
     }
 
     #[Route('/{id}/send', name: 'app_invoice_send', methods: ['POST'])]
-    public function send( Request $request, Invoice $invoice, GotenbergPdfInterface $gotenberg, MailerInterface $mailer,#[CurrentUser()] User $user) : Response 
-    {   
+    public function send(Request $request, Invoice $invoice, GotenbergPdfInterface $gotenberg, MailerInterface $mailer, #[CurrentUser] User $user): Response
+    {
         
-
-        if (!$user) {
-            throw $this->createAccessDeniedException('Vous devez être connecté.');
+        if ($invoice->getClient()?->getUser() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
         }
+
         if ($invoice->getStatus() === 'brouillons' || $invoice->getStatus() === null) {
             return $this->redirectToRoute('app_invoice_show', ['id' => $invoice->getId()]);
-            }
+        }
 
-        if ($this->isCsrfTokenValid('send' . $invoice->getId(), $request->getPayload()->getString('_token'))){
-
-            $pdfPath = $this->getParameter('kernel.project.dir') . 'var/facture-' . $invoice->getNumber() . '.pdf';
+        if ($this->isCsrfTokenValid('send' . $invoice->getId(), $request->getPayload()->getString('_token'))) {
+            $pdfPath = tempnam(sys_get_temp_dir(), 'facture_');
 
             $gotenberg->html()
-            ->content('invoice/pdf.html.twig', ['invoice' => $invoice])
-            ->processor(new \Sensiolabs\GotenbergBundle\Processor\FileProcessor(new \Symfony\Component\Filesystem\Filesystem(), $pdfPath))
-            ->generate()
-            ->process();
+                ->content('invoice/pdf.html.twig', ['invoice' => $invoice])
+                ->processor(new FileProcessor(new Filesystem(), $pdfPath))
+                ->generate()
+                ->process();
 
             $email = (new Email())
                 ->from($user->getEmail())
                 ->to($invoice->getClient()->getEmail())
                 ->subject('Facture N°' . $invoice->getNumber())
-                ->text("Bonjour" . $invoice->getClient()->getName() . ",\n\n Veuillez trouvez ci-joint votre facture.\n\n Cordialement,\n" . $user->getCompanyName())
-                ->attachFromPath($pdfPath, 'Facture-' . $invoice->getNumber() . '.pdf' , 'application/pdf');
+                ->text("Bonjour " . $invoice->getClient()->getName() . ",\n\nVeuillez trouver ci-joint votre facture.\n\nCordialement,\n" . $user->getCompanyName())
+                ->attachFromPath($pdfPath, 'Facture-' . $invoice->getNumber() . '.pdf', 'application/pdf');
 
-                $mailer->send($email);
+            $mailer->send($email);
 
-                if(file_exists($pdfPath)){
-                    unlink($pdfPath);
-                }
+            if (file_exists($pdfPath)) {
+                unlink($pdfPath);
+            }
 
-                $this->addFlash('success', 'La facture a bien été envoyée au client.');
+            $this->addFlash('success', 'La facture a bien été envoyée au client.');
         }
+
         return $this->redirectToRoute('app_invoice_show', ['id' => $invoice->getId()]);
     }
 }

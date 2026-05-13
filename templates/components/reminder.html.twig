@@ -1,0 +1,31 @@
+<div {{ attributes }}>
+    {% if sentCount is not null %}
+        <div class="flex items-center justify-between p-6 bg-green-50 rounded-xl border border-green-200 shadow-sm">
+            <div>
+                <p class="text-lg font-bold text-green-900">Relances terminées !</p>
+                <p class="text-sm text-green-700">{{ sentCount }} mails ont été envoyés avec succès.</p>
+            </div>
+            <i class="fa-solid fa-check-circle text-green-600 text-2xl"></i>
+        </div>
+    {% else %}
+        <button 
+            data-action="live#action" 
+            data-live-action-param="sendAll"
+            class="w-full flex items-center justify-between p-6 bg-white rounded-xl hover:bg-gray-100 transition-colors border border-gray-200 shadow-sm group"
+        >
+            <div>
+                <p class="text-lg font-bold text-gray-900 text-left">Relancer tous les clients</p>
+                
+                <p class="text-sm text-gray-600 text-left">
+                    Envoyer un mail automatique à tous les clients en retard
+                </p>
+                
+                <p class="text-sm text-blue-600 font-semibold text-left hidden">
+                    Envoi des emails en cours...
+                </p>
+            </div>
+                <i class="fa-solid fa-arrow-right text-gray-600"></i>
+
+        </button>
+    {% endif %}
+</div>

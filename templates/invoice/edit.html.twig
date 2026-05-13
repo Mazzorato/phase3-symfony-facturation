@@ -35,7 +35,9 @@
     <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
         <h2 class="text-lg font-semibold mb-4">Lignes de la facture</h2>
 
-        <table class="w-full mb-6">
+            {# {{ component('invoice_lines', {invoice: invoice }) }} #}
+            <twig:invoice_lines :invoice="invoice" />
+        {# <table class="w-full mb-6">
             <thead>
                 <tr class="border-b">
                     <th class="text-left py-2 text-sm font-semibold text-gray-700">Produit / Service</th>
@@ -52,28 +54,30 @@
                         <div class="font-medium">{{ product.name }}</div>
                         <div class="text-sm text-gray-400">{{ product.description }}</div>
                     </td>
-                    <td class="text-right py-3">{{ product.quantity }}</td>
+                    <td class="text-right py-3">
+                    <input type="number" name="quantity[{{ product.id }}]" value="{{ product.quantity }}" min="1" class="w-20 border border-gray-300 rounded-lg px-2 py-1 text-right">
+                    </td>
                     <td class="text-right py-3">{{ product.price }} €</td>
                     <td class="text-right py-3 font-medium">{{ product.price * product.quantity }} €</td>
                     <td class="text-right py-3">
-                        <button class="text-red-500 hover:text-red-700">
+                        <button type="submit" name="remove_line" value="{{ product.id }}" class="text-red-500 hover:text-red-700">
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
-        </table>
+        </table> #}
 
         <div class="flex gap-3 items-end">
             <div style="flex: 3">
                 <label class="block text-sm text-gray-600 mb-1">Sélectionner un produit</label>
-                <select name="product_id" class="w-full border border-gray-300 rounded-lg px-3 py-2">
-                    <option value=""></option>
+                <input list="products-list" name="product_id" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="Rechercher ou saisir l'ID...">
+                <datalist id="products-list">
                     {% for product in products %}
-                    <option value="{{ product.id }}">{{ product.name }}</option>
+                        <option value="{{ product.id }}">{{ product.name }}</option>
                     {% endfor %}
-                </select>
+                </datalist>
             </div>
             <div style="flex: 1">
                 <label class="block text-sm text-gray-600 mb-1">Quantité</label>
