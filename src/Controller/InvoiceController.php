@@ -1,22 +1,23 @@
 <?php
 namespace App\Controller;
 
-use App\Repository\ProductRepository;
 use App\Entity\Invoice;
+use App\Entity\Product;
+use App\Entity\User;
 use App\Form\InvoiceType;
 use App\Repository\InvoiceRepository;
+use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensiolabs\GotenbergBundle\GotenbergPdfInterface;
 use Sensiolabs\GotenbergBundle\Processor\FileProcessor;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
-use App\Entity\User;
 
 #[Route('/invoice')]
 final class InvoiceController extends AbstractController
@@ -44,32 +45,52 @@ final class InvoiceController extends AbstractController
     {
         $invoice = new Invoice();
         $form = $this->createForm(InvoiceType::class, $invoice);
+        $form->handleRequest($request);
 
         if ($request->request->has('add_line')) {
-            $productId = $request->request->get('product_id');
-            $quantity = $request->request->get('quantity', 1);
-            $unitPrice = $request->request->get('unit_price');
-            $product = $productRepository->find($productId);
+            $productInput = $request->request->get('product_id') ?? $request->request->get('product_name');
+            $quantity = (int) $request->request->get('quantity', 1);
+            $unitPrice = (float) $request->request->get('unit_price', 0);
 
-            if ($product) {
-                $invoice->setStatus('brouillons');
+            if (!empty($productInput)) {
+                $product = null;
+
+                if (is_numeric($productInput)) {
+                    $product = $productRepository->find($productInput);
+                }
+
+                if (!$product) {
+                    $product = $productRepository->findOneBy(['name' => $productInput, 'user' => $this->getUser()]);
+                }
+
+                if (!$product) {
+                    $product = new Product();
+                    $product->setName((string) $productInput);
+                    $product->setDescription('Produit créé depuis la facture');
+                    $product->setUnit('Unité');
+                    $product->setUser($this->getUser());
+                    $entityManager->persist($product);
+                }
+
                 $product->setQuantity($quantity);
                 $product->setPrice($unitPrice);
                 $invoice->addProduct($product);
 
+                $invoice->setStatus('brouillons');
+
+                if (!$invoice->getCreateAt()) {
+                    $invoice->setCreateAt(new \DateTime());
+                }
+
                 $entityManager->persist($invoice);
-                $entityManager->persist($product);
                 $entityManager->flush();
 
                 return $this->redirectToRoute('app_invoice_edit', ['id' => $invoice->getId()]);
             }
         }
 
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $status = $request->request->get('status');
-            $invoice->setStatus($status);
+        if ($form->isSubmitted() && $form->isValid() && $request->request->has('status')) {
+            $invoice->setStatus($request->request->get('status'));
 
             $total = 0;
             foreach ($invoice->getProducts() as $product) {
@@ -77,10 +98,12 @@ final class InvoiceController extends AbstractController
             }
             $invoice->setTotalTtc($total);
 
-            $date = new \DateTime();
-            $count = $invoiceRepository->countInvoicesThisMonth() + 1;
-            $invoice->setNumber('FACT-' . $date->format('Ymd') . '-' . $count);
-            $invoice->setCreateAt($date);
+            if (!$invoice->getNumber()) {
+                $date = new \DateTime();
+                $count = $invoiceRepository->countInvoicesThisMonth() + 1;
+                $invoice->setNumber('FACT-' . $date->format('Ymd') . '-' . $count);
+                $invoice->setCreateAt($date);
+            }
 
             $entityManager->persist($invoice);
             $entityManager->flush();
@@ -110,28 +133,12 @@ final class InvoiceController extends AbstractController
     #[Route('/{id}/edit', name: 'app_invoice_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Invoice $invoice, EntityManagerInterface $entityManager, ProductRepository $productRepository, InvoiceRepository $invoiceRepository): Response
     {
-        
         if ($invoice->getClient()?->getUser() !== $this->getUser()) {
             throw $this->createAccessDeniedException();
         }
 
         $form = $this->createForm(InvoiceType::class, $invoice);
-
-        if ($request->request->has('add_line')) {
-            $productId = $request->request->get('product_id');
-            $quantity = $request->request->get('quantity', 1);
-            $unitPrice = $request->request->get('unit_price');
-            $product = $productRepository->find($productId);
-
-            if ($product) {
-                $product->setQuantity($quantity);
-                $product->setPrice($unitPrice);
-                $invoice->addProduct($product);
-                $entityManager->flush();
-            }
-
-            return $this->redirectToRoute('app_invoice_edit', ['id' => $invoice->getId()]);
-        }
+        $form->handleRequest($request);
 
         if ($request->request->has('remove_line')) {
             $productId = $request->request->get('remove_line');
@@ -145,9 +152,43 @@ final class InvoiceController extends AbstractController
             return $this->redirectToRoute('app_invoice_edit', ['id' => $invoice->getId()]);
         }
 
-        if ($request->isMethod('POST') && $request->request->has('status')) {
-            $status = $request->request->get('status');
-            $invoice->setStatus($status);
+        if ($request->request->has('add_line')) {
+            $productInput = $request->request->get('product_id') ?? $request->request->get('product_name');
+            $quantity = (int) $request->request->get('quantity', 1);
+            $unitPrice = (float) $request->request->get('unit_price', 0);
+
+            if (!empty($productInput)) {
+                $product = null;
+
+                if (is_numeric($productInput)) {
+                    $product = $productRepository->find($productInput);
+                }
+
+                if (!$product) {
+                    $product = $productRepository->findOneBy(['name' => $productInput, 'user' => $this->getUser()]);
+                }
+
+                if (!$product) {
+                    $product = new Product();
+                    $product->setName((string) $productInput);
+                    $product->setDescription('Produit créé depuis la facture');
+                    $product->setUnit('Unité');
+                    $product->setUser($this->getUser());
+                    $entityManager->persist($product);
+                }
+
+                $product->setQuantity($quantity);
+                $product->setPrice($unitPrice);
+                $invoice->addProduct($product);
+
+                $entityManager->flush();
+            }
+
+            return $this->redirectToRoute('app_invoice_edit', ['id' => $invoice->getId()]);
+        }
+
+        if ($form->isSubmitted() && $form->isValid() && $request->request->has('status')) {
+            $invoice->setStatus($request->request->get('status'));
 
             $total = 0;
             foreach ($invoice->getProducts() as $product) {
@@ -159,7 +200,10 @@ final class InvoiceController extends AbstractController
                 $date = new \DateTime();
                 $count = $invoiceRepository->countInvoicesThisMonth() + 1;
                 $invoice->setNumber('FACT-' . $date->format('Ymd') . '-' . $count);
-                $invoice->setCreateAt(new \DateTime());
+                
+                if (!$invoice->getCreateAt()) {
+                    $invoice->setCreateAt($date);
+                }
             }
 
             $entityManager->flush();
@@ -177,12 +221,11 @@ final class InvoiceController extends AbstractController
     #[Route('/{id}', name: 'app_invoice_delete', methods: ['POST'])]
     public function delete(Request $request, Invoice $invoice, EntityManagerInterface $entityManager): Response
     {
-        
         if ($invoice->getClient()?->getUser() !== $this->getUser()) {
             throw $this->createAccessDeniedException();
         }
 
-        if ($invoice->getStatus() !== 'brouillon' && $invoice->getStatus() !== null) {
+        if ($invoice->getStatus() !== 'brouillons' && $invoice->getStatus() !== null) {
             $this->addFlash('error', 'Seules les factures en brouillon peuvent être supprimées');
             return $this->redirectToRoute('app_invoice_show', ['id' => $invoice->getId()]);
         }
@@ -198,7 +241,6 @@ final class InvoiceController extends AbstractController
     #[Route('/{id}/validate', name: 'app_invoice_validate', methods: ['POST'])]
     public function validate(Request $request, Invoice $invoice, EntityManagerInterface $entityManager): Response
     {
-       
         if ($invoice->getClient()?->getUser() !== $this->getUser()) {
             throw $this->createAccessDeniedException();
         }
@@ -214,7 +256,6 @@ final class InvoiceController extends AbstractController
     #[Route('/{id}/pay', name: 'app_invoice_pay', methods: ['POST'])]
     public function pay(Request $request, Invoice $invoice, EntityManagerInterface $entityManager): Response
     {
-        
         if ($invoice->getClient()?->getUser() !== $this->getUser()) {
             throw $this->createAccessDeniedException();
         }
@@ -230,7 +271,6 @@ final class InvoiceController extends AbstractController
     #[Route('/{id}/pdf', name: 'app_invoice_pdf', methods: ['GET'])]
     public function pdf(Invoice $invoice, GotenbergPdfInterface $gotenberg): Response
     {
-        
         if ($invoice->getClient()?->getUser() !== $this->getUser()) {
             throw $this->createAccessDeniedException();
         }
@@ -248,7 +288,6 @@ final class InvoiceController extends AbstractController
     #[Route('/{id}/send', name: 'app_invoice_send', methods: ['POST'])]
     public function send(Request $request, Invoice $invoice, GotenbergPdfInterface $gotenberg, MailerInterface $mailer, #[CurrentUser] User $user): Response
     {
-        
         if ($invoice->getClient()?->getUser() !== $this->getUser()) {
             throw $this->createAccessDeniedException();
         }
