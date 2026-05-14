@@ -42,6 +42,7 @@ class Invoice
     public function __construct()
     {
         $this->products = new ArrayCollection();
+        $this->createAt = new \DateTime();
     }
 
     public function getId(): ?int
